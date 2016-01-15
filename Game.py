@@ -128,7 +128,7 @@ def enemyMovementAI(enemyInfo):
     if enemyInfo[0] == 1 or enemyInfo[0] == 2:
         #This enemy is the Blue Bomber
         #dy = (enemyInfo[4])
-        if random.randint(1,7) == 1: enemyInfo[9] = -enemyInfo[9]
+        if random.randint(1, 20) == 1: enemyInfo[9] = -enemyInfo[9]
         if(enemyInfo[7] + enemyInfo[9] + enemyInfo[11] > int(.2*display_height)) or (enemyInfo[7] + enemyInfo[9] < 0):
             enemyInfo[9] = -enemyInfo[9]
         else:
@@ -136,7 +136,7 @@ def enemyMovementAI(enemyInfo):
     if enemyInfo[0] == 2:
         #This enemy is the H Jet
         #dx = ( enemyInfo[4])
-        if random.randint(1,7) == 1: enemyInfo[8] = -enemyInfo[8]
+        if random.randint(1, 20) == 1: enemyInfo[8] = -enemyInfo[8]
         if(enemyInfo[6] + enemyInfo[8] + enemyInfo[10] > display_width) or (enemyInfo[6] + enemyInfo[8] < 0):
             enemyInfo[8] = -enemyInfo[8]
         else:
@@ -144,7 +144,7 @@ def enemyMovementAI(enemyInfo):
     return enemyInfo
 
 def enemyAttackAI(aggressionLevel):
-    return random.randint(1, int((1/float(aggressionLevel)) * 45))
+    return random.randint(1, int((1/float(aggressionLevel)) * 90))
 
 def gameLoop():
     # INITIALIZATION
@@ -155,7 +155,7 @@ def gameLoop():
     ammo = 5000000
     enemiesAlive = 0
     currentLevel = 0
-    currentGun = "Basic Gun"
+    currentGun = "Long Gun"
     myHealth = 100
     myProjectiles = [] #[NAME, X1, Y1, WIDTH, HEIGHT, R, G, B, SPEED]
     myEnemies = [] #[species, weapon, health, aggression, speed, img, x, y, dx, dy]
@@ -188,7 +188,7 @@ def gameLoop():
             currentLevel = currentLevel + 1
             for i in range(currentLevel):
                 enemiesAlive = enemiesAlive + 1
-                myEnemies.append(enemy(min(random.randint(0, currentLevel),2)))
+                myEnemies.append(enemy(min(random.randint(0, min(2,currentLevel)),2)))
         
         
                             
@@ -235,86 +235,68 @@ def gameLoop():
         x = x + rocketXDelta
         y = y + rocketYDelta
         gameDisplay.fill(black)
-        i = 0
         
         myDeleteList = []
-        iCanLoop = True
-        while iCanLoop == True:
-            if i < len(myProjectiles):
-                if (myProjectiles[i][0] == "Star" or myProjectiles[i][0] == "Enem"):
-                    if myProjectiles[i][2] + myProjectiles[i][8] + 1 >= display_height:
+        for i in range(len(myProjectiles)):
+            if (myProjectiles[i][0] == "Star" or myProjectiles[i][0] == "Enem"):
+                if myProjectiles[i][2] + myProjectiles[i][8] + 1 >= display_height:
+                    myDeleteList.append(i)
+                    #del myProjectiles[i]
+            elif i < len(myProjectiles):
+                if str(myProjectiles[i][0])[:4] == "My B":
+                    if myProjectiles[i][2] + myProjectiles[i][8] - 1 < 0:
                         myDeleteList.append(i)
                         #del myProjectiles[i]
-                elif i < len(myProjectiles):
-                    if str(myProjectiles[i][0])[:4] == "My B":
-                        if myProjectiles[i][2] + myProjectiles[i][8] - 1 < 0:
-                            myDeleteList.append(i)
-                            #del myProjectiles[i]
-                        elif i < len(myProjectiles):
-                            if str(myProjectiles[i][0])[:4] == "My B":
-                                #print str(myProjectiles[i][0])[:4]
-                                for j in range(len(myEnemies)):
-                                    try:
-                                        if ((myProjectiles[i][1] + myProjectiles[i][3] >= myEnemies[j][6]) and (myProjectiles[i][1] <= myEnemies[j][6] + myEnemies[j][10]) and (myProjectiles[i][2] + myProjectiles[i][4] >= myEnemies[j][7]) and (myProjectiles[i][2] <= myEnemies[j][7] + myEnemies[j][11])):
-                                            i
-                                            str(myProjectiles[i][0])[:4] 
-                                            myProjectiles[i]
-                                            #myProjectiles[i][0]
-                                            #myProjectiles[i][9]
-                                            #myEnemies[j][2]
-                                            #print "Ship damaged. Health went from " + str(myEnemies[j][2]) + " to " + str(myEnemies[j][2] - myProjectiles[i][9])
-                                            myEnemies[j][2] = myEnemies[j][2] - myProjectiles[i][9]
-                                            myDeleteList.append(i)
-                                            #del myProjectiles[i]
-                                            #numberDeletedProjectiles = numberDeletedProjectiles + 1
-                                    except:
-                                        print "********An error has occured********"
-                                        print "I'm on the "
-                                        print str(i)
-                                        print " line."
-                                        print "The projectile matrix has "
-                                        print len(myProjectiles)
-                                        print " lines"
-                                        print "-"
-                                        print numberDeletedProjectiles
-                                        print "deleted lines."
-                                        print myProjectiles
-                                        print str(myProjectiles[i][0])[:4] 
-                                        print myProjectiles[i]
-                                        print "****Error reporting has finished****"
-                                        #quit()
+                    else:
+                        for j in range(len(myEnemies)):
+                            try:
+                                if ((myProjectiles[i][1] + myProjectiles[i][3] >= myEnemies[j][6]) and (myProjectiles[i][1] <= myEnemies[j][6] + myEnemies[j][10]) and (myProjectiles[i][2] + myProjectiles[i][4] >= myEnemies[j][7]) and (myProjectiles[i][2] <= myEnemies[j][7] + myEnemies[j][11])):
+                                    myEnemies[j][2] = myEnemies[j][2] - myProjectiles[i][9]
+                                    myDeleteList.append(i)
+                                    #del myProjectiles[i]
+                            except:
+                                print "********An error has occured********"
+                                print "I'm on the "
+                                print str(i)
+                                print " line."
+                                print "The projectile matrix has "
+                                print len(myProjectiles)
+                                print " lines"
+                                print "-"
+                                print numberDeletedProjectiles
+                                print "deleted lines."
+                                print myProjectiles
+                                print str(myProjectiles[i][0])[:4] 
+                                print myProjectiles[i]
+                                print "****Error reporting has finished****"
+                                #quit()
                 
-                if i < len(myProjectiles):
-                    myProjectiles[i][2] = myProjectiles[i][2] + myProjectiles[i][8]
-                    pygame.draw.line(gameDisplay, white, (myProjectiles[i][1], myProjectiles[i][2]), (myProjectiles[i][1] + myProjectiles[i][3], myProjectiles[i][2] + myProjectiles[i][4]))
-                i = i + 1
-            else:
-                iCanLoop = False
-
+            if i < len(myProjectiles):
+                myProjectiles[i][2] = myProjectiles[i][2] + myProjectiles[i][8]
+                pygame.draw.line(gameDisplay, white, (myProjectiles[i][1], myProjectiles[i][2]), (myProjectiles[i][1] + myProjectiles[i][3], myProjectiles[i][2] + myProjectiles[i][4]))
+        
         for i in range(len(myDeleteList)):
             del myProjectiles[myDeleteList[i]-i]
         
-        iCanLoop = True        
-        i = 0
-        while iCanLoop == True:
-            if i < len(myEnemies):
-                if myEnemies[i][2] <= 0:
-                    enemiesAlive = enemiesAlive - 1
-                    del myEnemies[i]
-                    
-                else:
-                    if i < range(len(myEnemies)):
-                        if enemyAttackAI(myEnemies[i][3]) == 1:
-                            bulletProperties = loadBulletInfoIntomyProjectilesMatrix(currentGun, True)
-                            myProjectiles.append([bulletProperties[0], myEnemies[i][6], myEnemies[i][7] , bulletProperties[1], bulletProperties[2], bulletProperties[3], bulletProperties[4], bulletProperties[5], bulletProperties[6], bulletProperties[7]])
-                        myEnemies[i][6] = myEnemies[i][6] + myEnemies[i][8]
-                        myEnemies[i][7] = myEnemies[i][7] + myEnemies[i][9]
-                        drawObject(myEnemies[i][5], myEnemies[i][6], myEnemies[i][7])
-                        myEnemies[i] = enemyMovementAI(myEnemies[i])
-                i = i + 1
+        myDeleteList = []
+        for i in range(len(myEnemies)):
+            if myEnemies[i][2] <= 0:
+                enemiesAlive = enemiesAlive - 1
+                myDeleteList.append(i)
+                #del myEnemies[i]
             else:
-                iCanLoop = False
-                       
+                if i < range(len(myEnemies)):
+                    if enemyAttackAI(myEnemies[i][3]) == 1:
+                        bulletProperties = loadBulletInfoIntomyProjectilesMatrix(myEnemies[i][1], True)
+                        myProjectiles.append([bulletProperties[0], myEnemies[i][6], myEnemies[i][7] , bulletProperties[1], bulletProperties[2], bulletProperties[3], bulletProperties[4], bulletProperties[5], bulletProperties[6], bulletProperties[7]])
+                    myEnemies[i][6] = myEnemies[i][6] + myEnemies[i][8]
+                    myEnemies[i][7] = myEnemies[i][7] + myEnemies[i][9]
+                    drawObject(myEnemies[i][5], myEnemies[i][6], myEnemies[i][7])
+                    myEnemies[i] = enemyMovementAI(myEnemies[i])
+
+        for i in range(len(myDeleteList)):
+            del myEnemies[myDeleteList[i]-i]
+        
         drawObject("Rocket.png", x, y)
         starMoveSpeed = max(minimumStarMoveSpeed, starMoveSpeed - .05)
         pygame.display.update()
