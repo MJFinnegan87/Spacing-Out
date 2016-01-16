@@ -266,6 +266,7 @@ def gameLoop():
         for i in range(len(myEnemies)): #for each enemy
             if myEnemies[i][2] <= 0: #if this enemy's health is <= 0, then
                 enemiesAlive = enemiesAlive - 1
+                score = score + 1
                 myDeleteList.append(i) #flag this enemy for deletion
             else:
                 if enemyAttackAI(myEnemies[i][3]) == 1: #decide if enemy will attack
@@ -287,6 +288,7 @@ def gameLoop():
         smallMessageDisplay("Health: " + str(myHealth), 0)
         smallMessageDisplay("Ammo: " + str(ammo), 1)
         smallMessageDisplay("Level: " + str(currentLevel), 2)
+        smallMessageDisplay("Score: " + str(score), 3)
         starMoveSpeed = max(minimumStarMoveSpeed, starMoveSpeed - .05)
         pygame.display.update()
         clock.tick(60)
