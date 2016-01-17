@@ -47,7 +47,7 @@ def loadBulletInfoIntomyProjectilesMatrix(gunType, belongsToEnemy):
     if gunType == "Laser Gun":
         bulletWidth = 3
         bulletLength = 100
-        speed = -10
+        speed = -25
         r = 255
         g = 255
         b = 0
@@ -108,7 +108,7 @@ def enemy(species):
         width = 47
         height = 46
     if species == 2:
-        weapon = "Plasma Gun"
+        weapon = "Laser Gun"
         health = 100
         aggression = 3
         speed = 4
@@ -183,6 +183,8 @@ def gameLoop():
         #ADD ENEMIES
         if enemiesAlive == 0:
             currentLevel = currentLevel + 1
+            if currentLevel >= 6:
+                currentGun = "Plasma Gun"
             for i in range(currentLevel):
                 enemiesAlive = enemiesAlive + 1
                 myEnemies.append(enemy(min(random.randint(0, min(2,currentLevel)),2)))
@@ -256,7 +258,7 @@ def gameLoop():
                             myDeleteList.append(i) #flag this bullet for deletion
             #move this projectile in the direction it needs to go
             myProjectiles[i][2] = myProjectiles[i][2] + myProjectiles[i][8]
-            pygame.draw.polygon(gameDisplay, white, ((myProjectiles[i][1], myProjectiles[i][2]), (myProjectiles[i][1] + myProjectiles[i][3], myProjectiles[i][2]),  (myProjectiles[i][1], myProjectiles[i][2] + myProjectiles[i][4]), (myProjectiles[i][1] + myProjectiles[i][3], myProjectiles[i][2] + myProjectiles[i][4])), 0)
+            pygame.draw.polygon(gameDisplay, (myProjectiles[i][5], myProjectiles[i][6], myProjectiles[i][7]), ((myProjectiles[i][1], myProjectiles[i][2]), (myProjectiles[i][1] + myProjectiles[i][3], myProjectiles[i][2]),  (myProjectiles[i][1], myProjectiles[i][2] + myProjectiles[i][4]), (myProjectiles[i][1] + myProjectiles[i][3], myProjectiles[i][2] + myProjectiles[i][4])), 0)
 
         #delete those projectiles we flagged for deletion
         for i in range(len(myDeleteList)):
