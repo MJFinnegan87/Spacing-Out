@@ -131,18 +131,16 @@ def enemyMovementAI(enemyInfo):
             enemyInfo[8] = -enemyInfo[4]
     if enemyInfo[0] == 1 or enemyInfo[0] == 2:
         #This enemy is the Blue Bomber
-        if random.randint(1, 20) == 1: enemyInfo[9] = -enemyInfo[9]
+        if random.randint(1, 20) == 1:
+            enemyInfo[9] = -enemyInfo[9]
         if(enemyInfo[7] + enemyInfo[9] + enemyInfo[11] > int(.2*display_height)) or (enemyInfo[7] + enemyInfo[9] < 0):
             enemyInfo[9] = -enemyInfo[9]
-        else:
-            enemyInfo[9] = enemyInfo[9]
     if enemyInfo[0] == 2:
         #This enemy is the H Jet
-        if random.randint(1, 20) == 1: enemyInfo[8] = -enemyInfo[8]
+        if random.randint(1, 20) == 1:
+            enemyInfo[8] = -enemyInfo[8]
         if(enemyInfo[6] + enemyInfo[8] + enemyInfo[10] > display_width) or (enemyInfo[6] + enemyInfo[8] < 0):
             enemyInfo[8] = -enemyInfo[8]
-        else:
-            enemyInfo[8] = enemyInfo[8]  
     return enemyInfo
 
 def enemyAttackAI(aggressionLevel):
@@ -183,7 +181,7 @@ def gameLoop():
         #ADD ENEMIES
         if enemiesAlive == 0:
             currentLevel = currentLevel + 1
-            if currentLevel >= 6:
+            if currentLevel >= 8:
                 currentGun = "Plasma Gun"
             for i in range(currentLevel):
                 enemiesAlive = enemiesAlive + 1
@@ -286,6 +284,8 @@ def gameLoop():
             lost = True
             exiting = True
             largeMessageDisplay("YOU LOSE")
+            gameDisplay.fill(black)
+            largeMessageDisplay(str(score) + " pts")
         drawObject("Rocket.png", x, y)
         smallMessageDisplay("Health: " + str(myHealth), 0)
         smallMessageDisplay("Ammo: " + str(ammo), 1)
