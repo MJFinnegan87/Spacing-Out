@@ -257,7 +257,7 @@ def gameLoop():
             #move this projectile in the direction it needs to go
             myProjectiles[i][2] = myProjectiles[i][2] + myProjectiles[i][8]
             pygame.draw.polygon(gameDisplay, (myProjectiles[i][5], myProjectiles[i][6], myProjectiles[i][7]), ((myProjectiles[i][1], myProjectiles[i][2]), (myProjectiles[i][1] + myProjectiles[i][3], myProjectiles[i][2]),  (myProjectiles[i][1], myProjectiles[i][2] + myProjectiles[i][4]), (myProjectiles[i][1] + myProjectiles[i][3], myProjectiles[i][2] + myProjectiles[i][4])), 0)
-
+            
         #delete those projectiles we flagged for deletion
         for i in range(len(myDeleteList)):
             del myProjectiles[myDeleteList[i]-i]
