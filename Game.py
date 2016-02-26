@@ -183,12 +183,12 @@ def gameLoop():
             currentLevel = currentLevel + 1
             if currentLevel >= 8:
                 currentGun = "Plasma Gun"
-            for i in range(currentLevel):
+            for i in xrange(currentLevel):
                 enemiesAlive = enemiesAlive + 1
                 myEnemies.append(enemy(min(random.randint(0, min(2,currentLevel)),2)))
         
         #ADD STARS
-        if random.randint(1,starProbabilitySpace) in range(1, int(starDensity * starProbabilitySpace)+1):            
+        if random.randint(1,starProbabilitySpace) in xrange(1, int(starDensity * starProbabilitySpace)+1):            
             rndNumb = random.randint(1, display_width)
                                     #NAME, X1,    Y1,WIDTH,HEIGHT,   R,   G,   B,    SPEED  NO VALUE THIS IS JUST TO KEEP ALL ROWS IN THE PROJECTILE ARRAY THE SAME LENGTH
             myProjectiles.append(["Star", rndNumb, 0, 1 , 1 , 255, 255, 255, starMoveSpeed, 0])
@@ -199,7 +199,7 @@ def gameLoop():
                 exiting = True
                 lost = False
             i = 0
-            for i in range(2):
+            for i in xrange(2):
                 keys = pygame.key.get_pressed()
                 if keys[pygame.K_RIGHT] and not keys[pygame.K_LEFT]:
                     rocketXDelta = rocketAccel
@@ -236,7 +236,7 @@ def gameLoop():
         gameDisplay.fill(black)
         
         myDeleteList = []
-        for i in range(len(myProjectiles)): #for each bullet and star
+        for i in xrange(len(myProjectiles)): #for each bullet and star
             if (myProjectiles[i][0] == "Star" or str(myProjectiles[i][0])[:4] == "Enem"): #if this projectile is a star or enemy bullet (falls down),
                 if myProjectiles[i][2] + myProjectiles[i][8] + 1 >= display_height: #if it's going beyond the bottom of the screen
                     myDeleteList.append(i) #flag it for deletion by putting it in a list which we later use to delete it from myProjectiles. Deleting now wreaks havoc on our for loop
@@ -248,7 +248,7 @@ def gameLoop():
                 if myProjectiles[i][2] + myProjectiles[i][8] - 1 < 0: #if it's going above the top of the screen,
                     myDeleteList.append(i) #flag this projectile for deletion
                 else:
-                    for j in range(len(myEnemies)): #with this bullet, for each enemy:
+                    for j in xrange(len(myEnemies)): #with this bullet, for each enemy:
                         #if this bullet hit this enemy,
                         if ((myProjectiles[i][1] + myProjectiles[i][3] >= myEnemies[j][6]) and (myProjectiles[i][1] <= myEnemies[j][6] + myEnemies[j][10]) and (myProjectiles[i][2] + myProjectiles[i][4] >= myEnemies[j][7]) and (myProjectiles[i][2] <= myEnemies[j][7] + myEnemies[j][11])):
                             #print "you hit enemy. Prev Health: " + str(myEnemies[j][2]) + " current health: " + str(myEnemies[j][2] - myProjectiles[i][9])
@@ -259,11 +259,11 @@ def gameLoop():
             pygame.draw.polygon(gameDisplay, (myProjectiles[i][5], myProjectiles[i][6], myProjectiles[i][7]), ((myProjectiles[i][1], myProjectiles[i][2]), (myProjectiles[i][1] + myProjectiles[i][3], myProjectiles[i][2]),  (myProjectiles[i][1], myProjectiles[i][2] + myProjectiles[i][4]), (myProjectiles[i][1] + myProjectiles[i][3], myProjectiles[i][2] + myProjectiles[i][4])), 0)
             
         #delete those projectiles we flagged for deletion
-        for i in range(len(myDeleteList)):
+        for i in xrange(len(myDeleteList)):
             del myProjectiles[myDeleteList[i]-i]
         
         myDeleteList = []
-        for i in range(len(myEnemies)): #for each enemy
+        for i in xrange(len(myEnemies)): #for each enemy
             if myEnemies[i][2] <= 0: #if this enemy's health is <= 0, then
                 enemiesAlive = enemiesAlive - 1
                 score = score + 1
@@ -277,7 +277,7 @@ def gameLoop():
                 drawObject(myEnemies[i][5], myEnemies[i][6], myEnemies[i][7])
                 myEnemies[i] = enemyMovementAI(myEnemies[i]) #establish this enemy's next move
         #delete enemies that were flagged for completion
-        for i in range(len(myDeleteList)):
+        for i in xrange(len(myDeleteList)):
             del myEnemies[myDeleteList[i]-i]
 
         if myHealth <= 0:
@@ -306,8 +306,8 @@ black = (0,0,0)
 white = (255,255,255)
 red = (255,0,0)
 clock = pygame.time.Clock()
-display_width = 1024
-display_height = 768
+display_width = 1280
+display_height = 720
 myCharacter = ""
 gameDisplay = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption('Spacing Out')
