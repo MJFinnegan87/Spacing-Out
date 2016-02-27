@@ -89,17 +89,17 @@ def enemy(species):
     height = 0
     if species == 0:
         weapon = "Teleport"
-        health = 100
+        health = 33
         aggression = 1
         speed = 2
         img = "UFO.png"
         dx = speed
         dy = 0
         width = 52
-        height = 30
+        height = 40
     if species == 1:
         weapon = "Basic Gun"
-        health = 100
+        health = 66
         aggression = 2
         speed = 3
         img = "Blue Bomber.png"
@@ -251,7 +251,6 @@ def gameLoop():
                     for j in xrange(len(myEnemies)): #with this bullet, for each enemy:
                         #if this bullet hit this enemy,
                         if ((myProjectiles[i][1] + myProjectiles[i][3] >= myEnemies[j][6]) and (myProjectiles[i][1] <= myEnemies[j][6] + myEnemies[j][10]) and (myProjectiles[i][2] + myProjectiles[i][4] >= myEnemies[j][7]) and (myProjectiles[i][2] <= myEnemies[j][7] + myEnemies[j][11])):
-                            #print "you hit enemy. Prev Health: " + str(myEnemies[j][2]) + " current health: " + str(myEnemies[j][2] - myProjectiles[i][9])
                             myEnemies[j][2] = myEnemies[j][2] - myProjectiles[i][9] #reduce enemy health
                             myDeleteList.append(i) #flag this bullet for deletion
             #move this projectile in the direction it needs to go
