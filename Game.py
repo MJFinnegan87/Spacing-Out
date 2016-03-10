@@ -146,6 +146,129 @@ def enemyMovementAI(enemyInfo):
 def enemyAttackAI(aggressionLevel):
     return random.randint(1, int((1/float(aggressionLevel)) * 120))
 
+def handleKeyPresses(ammo, currentGun, myProjectiles, rocketAccel, x, y, rocketWidth):
+    #HANDLE KEY PRESS/RELEASE/USER ACTIONS
+    keys = pygame.key.get_pressed()
+    exiting = False
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            exiting = True
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and ammo >0: #MAKE USER NEED TO PRESS SPACE OVER AND OVER TO FIRE
+            ammo = ammo - 1
+            bulletProperties = loadBulletInfoIntomyProjectilesMatrix(currentGun, False)
+            myProjectiles.append([bulletProperties[0], x + (rocketWidth/2) - int((bulletProperties[1]/2)) , y , bulletProperties[1], bulletProperties[2], bulletProperties[3], bulletProperties[4], bulletProperties[5], bulletProperties[6], bulletProperties[7]])
+            #print "Firing! Damage: " + str(myProjectiles[len(myProjectiles)-1][9])
+    rocketXDelta = 0
+    rocketYDelta = 0
+    if keys[pygame.K_RIGHT] and not keys[pygame.K_LEFT]: #WHEREAS DIRECTION KEYS CAN BE HELD DOWN
+        rocketXDelta = rocketAccel
+    if keys[pygame.K_LEFT] and not keys[pygame.K_RIGHT]:
+        rocketXDelta = -rocketAccel
+    if keys[pygame.K_UP] and not keys[pygame.K_DOWN]:
+        rocketYDelta = -rocketAccel
+    if keys[pygame.K_DOWN] and not keys[pygame.K_UP]:
+        rocketYDelta = rocketAccel
+    return exiting, ammo, myProjectiles, rocketXDelta, rocketYDelta
+
+def addGameObjects(enemiesAlive, currentLevel, currentGun, myEnemies, starProbabilitySpace, starDensity, starMoveSpeed, myProjectiles):
+    #ADD ENEMIES
+    if enemiesAlive == 0:
+        currentLevel = currentLevel + 1
+        if currentLevel >= 8:
+            currentGun = "Plasma Gun"
+        for i in xrange(currentLevel):
+            enemiesAlive = enemiesAlive + 1
+            myEnemies.append(enemy(random.randint(0, min(currentLevel-1,2))))
+                                   
+    #ADD STARS
+    if random.randint(1,starProbabilitySpace) in xrange(1, int(starDensity * starProbabilitySpace)+1):            
+        rndNumb = random.randint(1, display_width)
+                                #NAME, X1,    Y1,WIDTH,HEIGHT,   R,   G,   B,    SPEED  NO VALUE THIS IS JUST TO KEEP ALL ROWS IN THE PROJECTILE ARRAY THE SAME LENGTH
+        myProjectiles.append(["Star", rndNumb, 0, 1 , 1 , 255, 255, 255, starMoveSpeed, 0])
+    return currentLevel, currentGun, enemiesAlive, myEnemies, myProjectiles
+
+def movePlayer(x, y, rocketWidth, rocketHeight, rocketXDelta, rocketYDelta, display_width, display_height):
+    #TEST FOR PLAYER ATTEMPTING TO TRAVEL BEYOND SCREEN BOUNDS
+    if (x + rocketWidth + rocketXDelta > display_width) or (x + rocketXDelta < 0):
+        rocketXDelta = 0
+    if (y + rocketYDelta <0) or (y + rocketHeight + rocketYDelta > display_height):
+        rocketYDelta = 0
+    x = x + rocketXDelta
+    y = y + rocketYDelta
+    return x, y
+
+def moveAndDrawProjectilesAndEnemies(myProjectiles, myEnemies, display_height, myHealth, score, enemiesAlive, x, y, rocketWidth, rocketHeight):
+    myDeleteList = []
+    for i in xrange(len(myProjectiles)): #for each bullet and star
+        if (myProjectiles[i][0] == "Star" or str(myProjectiles[i][0])[:4] == "Enem"): #if this projectile is a star or enemy bullet (falls down),
+            if myProjectiles[i][2] + myProjectiles[i][8] + 1 >= display_height: #if it's going beyond the bottom of the screen
+                myDeleteList.append(i) #flag it for deletion by putting it in a list which we later use to delete it from myProjectiles. Deleting now wreaks havoc on our for loop
+            #otherwise if it's not going beyond the bottom of the screen, then if it's an enemy bullet that hit the user, then
+            elif str(myProjectiles[i][0])[:4] == "Enem" and ((myProjectiles[i][1] + myProjectiles[i][3] >= x) and (myProjectiles[i][1] <= x + rocketWidth) and (myProjectiles[i][2] + myProjectiles[i][4] >= y) and (myProjectiles[i][2] <= y + rocketHeight)):
+                myHealth = myHealth - myProjectiles[i][9]
+                myDeleteList.append(i)
+        elif str(myProjectiles[i][0])[:4] == "My B": #otherwise if it's actually user's bullet (goes up),
+            if myProjectiles[i][2] + myProjectiles[i][8] - 1 < 0: #if it's going above the top of the screen,
+                myDeleteList.append(i) #flag this projectile for deletion
+            else:
+                for j in xrange(len(myEnemies)): #with this bullet, for each enemy:
+                    #if this bullet hit this enemy,
+                    if ((myProjectiles[i][1] + myProjectiles[i][3] >= myEnemies[j][6]) and (myProjectiles[i][1] <= myEnemies[j][6] + myEnemies[j][10]) and (myProjectiles[i][2] + myProjectiles[i][4] >= myEnemies[j][7]) and (myProjectiles[i][2] <= myEnemies[j][7] + myEnemies[j][11])):
+                        myEnemies[j][2] = myEnemies[j][2] - myProjectiles[i][9] #reduce enemy health
+                        myDeleteList.append(i) #flag this bullet for deletion
+        #move this projectile in the direction it needs to go
+        myProjectiles[i][2] = myProjectiles[i][2] + myProjectiles[i][8]
+        pygame.draw.polygon(gameDisplay, (myProjectiles[i][5], myProjectiles[i][6], myProjectiles[i][7]), ((myProjectiles[i][1], myProjectiles[i][2]), (myProjectiles[i][1] + myProjectiles[i][3], myProjectiles[i][2]),  (myProjectiles[i][1], myProjectiles[i][2] + myProjectiles[i][4]), (myProjectiles[i][1] + myProjectiles[i][3], myProjectiles[i][2] + myProjectiles[i][4])), 0)
+        
+    #delete those projectiles we flagged for deletion
+    for i in xrange(len(myDeleteList)):
+        del myProjectiles[myDeleteList[i]-i]
+    
+    myDeleteList = []
+    for i in xrange(len(myEnemies)): #for each enemy
+        if myEnemies[i][2] <= 0: #if this enemy's health is <= 0, then
+            enemiesAlive = enemiesAlive - 1
+            score = score + 1
+            myDeleteList.append(i) #flag this enemy for deletion
+        else:
+            if enemyAttackAI(myEnemies[i][3]) == 1: #decide if enemy will attack
+                bulletProperties = loadBulletInfoIntomyProjectilesMatrix(myEnemies[i][1], True) #if the enemy is attacking, then load the bullet in the projectile matrix
+                myProjectiles.append([bulletProperties[0], myEnemies[i][6], myEnemies[i][7] , bulletProperties[1], bulletProperties[2], bulletProperties[3], bulletProperties[4], bulletProperties[5], bulletProperties[6], bulletProperties[7]])
+            myEnemies[i][6] = myEnemies[i][6] + myEnemies[i][8] #move this enemy
+            myEnemies[i][7] = myEnemies[i][7] + myEnemies[i][9]
+            drawObject(myEnemies[i][5], myEnemies[i][6], myEnemies[i][7])
+            myEnemies[i] = enemyMovementAI(myEnemies[i]) #establish this enemy's next move
+    #delete enemies that were flagged for completion
+    for i in xrange(len(myDeleteList)):
+        del myEnemies[myDeleteList[i]-i]
+    return myProjectiles, myEnemies, myHealth, score, enemiesAlive
+
+def testIfPlayerLost(myHealth, exiting, score):
+    lost = False
+    if myHealth <= 0:
+        lost = True
+        exiting = True
+        largeMessageDisplay("YOU LOSE")
+        gameDisplay.fill(black)
+        largeMessageDisplay(str(score) + " pts")
+    return lost, exiting
+
+def drawPlayer(x, y):
+    drawObject("Rocket.png", x, y)
+
+def drawGameStats(myHealth, ammo, currentLevel, score):
+    smallMessageDisplay("Health: " + str(myHealth), 0)
+    smallMessageDisplay("Ammo: " + str(ammo), 1)
+    smallMessageDisplay("Level: " + str(currentLevel), 2)
+    smallMessageDisplay("Score: " + str(score), 3)
+
+def adjustStarMoveSpeed(minimumStarMoveSpeed, starMoveSpeed, decriment):
+    return max(minimumStarMoveSpeed, starMoveSpeed - decriment)  
+
+def updateScreenAndLimitFPS(FPSLimit):
+    pygame.display.update()
+    clock.tick(FPSLimit)
+        
 def gameLoop():
     # INITIALIZATION
     exiting = False
@@ -178,121 +301,19 @@ def gameLoop():
 
         #TEST FOR CONDITIONS THAT ALLOW FUTURE USER ACTIONS
 
-        #ADD ENEMIES
-        if enemiesAlive == 0:
-            currentLevel = currentLevel + 1
-            if currentLevel >= 8:
-                currentGun = "Plasma Gun"
-            for i in xrange(currentLevel):
-                enemiesAlive = enemiesAlive + 1
-                myEnemies.append(enemy(min(random.randint(0, min(2,currentLevel)),2)))
-        
-        #ADD STARS
-        if random.randint(1,starProbabilitySpace) in xrange(1, int(starDensity * starProbabilitySpace)+1):            
-            rndNumb = random.randint(1, display_width)
-                                    #NAME, X1,    Y1,WIDTH,HEIGHT,   R,   G,   B,    SPEED  NO VALUE THIS IS JUST TO KEEP ALL ROWS IN THE PROJECTILE ARRAY THE SAME LENGTH
-            myProjectiles.append(["Star", rndNumb, 0, 1 , 1 , 255, 255, 255, starMoveSpeed, 0])
-                  
-        #HANDLE KEY PRESS/RELEASE/USER ACTIONS
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                exiting = True
-                lost = False
-            i = 0
-            for i in xrange(2):
-                keys = pygame.key.get_pressed()
-                if keys[pygame.K_RIGHT] and not keys[pygame.K_LEFT]:
-                    rocketXDelta = rocketAccel
-                if keys[pygame.K_LEFT] and not keys[pygame.K_RIGHT]:
-                    rocketXDelta = -rocketAccel
-                if keys[pygame.K_UP] and not keys[pygame.K_DOWN]:
-                    rocketYDelta = -rocketAccel
-                if keys[pygame.K_DOWN] and not keys[pygame.K_UP]:
-                    rocketYDelta = rocketAccel
-                if i <1:
-                    if event.type == pygame.KEYUP:
-                        if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT or event.key == pygame.K_UP or event.key == pygame.K_DOWN:
-                            rocketXDelta = 0
-                            rocketYDelta = 0
-                    if keys[pygame.K_SPACE] and ammo >0:
-                        ammo = ammo - 1
-                        bulletProperties = loadBulletInfoIntomyProjectilesMatrix(currentGun, False)
-                        myProjectiles.append([bulletProperties[0], x + (rocketWidth/2) - int((bulletProperties[1]/2)) , y , bulletProperties[1], bulletProperties[2], bulletProperties[3], bulletProperties[4], bulletProperties[5], bulletProperties[6], bulletProperties[7]])
-                        #print "Firing! Damage: " + str(myProjectiles[len(myProjectiles)-1][9])
-        #DRAW SCREEN/MOVEMENT/ANIMATIONS/CHARACTER/OBJECTS
-        #COLLISION DETECTION/OBJECT DELETION/LOSE CHECKING
-        #this is all done in 1 for loop because separating
-        #these tasks out into multiple for loops takes longer execution time.
-        #Looping through all graphics objects
-
-        #TEST FOR PLAYER ATTEMPTING TO TRAVEL BEYOND SCREEN BOUNDS
-        if (x + rocketWidth + rocketXDelta > display_width) or (x + rocketXDelta < 0):
-            rocketXDelta = 0
-        if (y + rocketYDelta <0) or (y + rocketHeight + rocketYDelta > display_height):
-            rocketYDelta = 0
-        
-        x = x + rocketXDelta
-        y = y + rocketYDelta
+        currentLevel, currentGun, enemiesAlive, myEnemies, myProjectiles = addGameObjects(
+            enemiesAlive, currentLevel, currentGun, myEnemies, starProbabilitySpace, starDensity, starMoveSpeed, myProjectiles)
+        exiting, ammo, myProjectiles, rocketXDelta, rocketYDelta = handleKeyPresses(
+            ammo, currentGun, myProjectiles, rocketAccel, x, y, rocketWidth) 
+        x, y = movePlayer(x, y, rocketWidth, rocketHeight, rocketXDelta, rocketYDelta, display_width, display_height)
         gameDisplay.fill(black)
-        
-        myDeleteList = []
-        for i in xrange(len(myProjectiles)): #for each bullet and star
-            if (myProjectiles[i][0] == "Star" or str(myProjectiles[i][0])[:4] == "Enem"): #if this projectile is a star or enemy bullet (falls down),
-                if myProjectiles[i][2] + myProjectiles[i][8] + 1 >= display_height: #if it's going beyond the bottom of the screen
-                    myDeleteList.append(i) #flag it for deletion by putting it in a list which we later use to delete it from myProjectiles. Deleting now wreaks havoc on our for loop
-                #otherwise if it's not going beyond the bottom of the screen, then if it's an enemy bullet that hit the user, then
-                elif str(myProjectiles[i][0])[:4] == "Enem" and ((myProjectiles[i][1] + myProjectiles[i][3] >= x) and (myProjectiles[i][1] <= x + rocketWidth) and (myProjectiles[i][2] + myProjectiles[i][4] >= y) and (myProjectiles[i][2] <= y + rocketHeight)):
-                    myHealth = myHealth - myProjectiles[i][9]
-                    myDeleteList.append(i)
-            elif str(myProjectiles[i][0])[:4] == "My B": #otherwise if it's actually user's bullet (goes up),
-                if myProjectiles[i][2] + myProjectiles[i][8] - 1 < 0: #if it's going above the top of the screen,
-                    myDeleteList.append(i) #flag this projectile for deletion
-                else:
-                    for j in xrange(len(myEnemies)): #with this bullet, for each enemy:
-                        #if this bullet hit this enemy,
-                        if ((myProjectiles[i][1] + myProjectiles[i][3] >= myEnemies[j][6]) and (myProjectiles[i][1] <= myEnemies[j][6] + myEnemies[j][10]) and (myProjectiles[i][2] + myProjectiles[i][4] >= myEnemies[j][7]) and (myProjectiles[i][2] <= myEnemies[j][7] + myEnemies[j][11])):
-                            myEnemies[j][2] = myEnemies[j][2] - myProjectiles[i][9] #reduce enemy health
-                            myDeleteList.append(i) #flag this bullet for deletion
-            #move this projectile in the direction it needs to go
-            myProjectiles[i][2] = myProjectiles[i][2] + myProjectiles[i][8]
-            pygame.draw.polygon(gameDisplay, (myProjectiles[i][5], myProjectiles[i][6], myProjectiles[i][7]), ((myProjectiles[i][1], myProjectiles[i][2]), (myProjectiles[i][1] + myProjectiles[i][3], myProjectiles[i][2]),  (myProjectiles[i][1], myProjectiles[i][2] + myProjectiles[i][4]), (myProjectiles[i][1] + myProjectiles[i][3], myProjectiles[i][2] + myProjectiles[i][4])), 0)
-            
-        #delete those projectiles we flagged for deletion
-        for i in xrange(len(myDeleteList)):
-            del myProjectiles[myDeleteList[i]-i]
-        
-        myDeleteList = []
-        for i in xrange(len(myEnemies)): #for each enemy
-            if myEnemies[i][2] <= 0: #if this enemy's health is <= 0, then
-                enemiesAlive = enemiesAlive - 1
-                score = score + 1
-                myDeleteList.append(i) #flag this enemy for deletion
-            else:
-                if enemyAttackAI(myEnemies[i][3]) == 1: #decide if enemy will attack
-                    bulletProperties = loadBulletInfoIntomyProjectilesMatrix(myEnemies[i][1], True) #if the enemy is attacking, then load the bullet in the projectile matrix
-                    myProjectiles.append([bulletProperties[0], myEnemies[i][6], myEnemies[i][7] , bulletProperties[1], bulletProperties[2], bulletProperties[3], bulletProperties[4], bulletProperties[5], bulletProperties[6], bulletProperties[7]])
-                myEnemies[i][6] = myEnemies[i][6] + myEnemies[i][8] #move this enemy
-                myEnemies[i][7] = myEnemies[i][7] + myEnemies[i][9]
-                drawObject(myEnemies[i][5], myEnemies[i][6], myEnemies[i][7])
-                myEnemies[i] = enemyMovementAI(myEnemies[i]) #establish this enemy's next move
-        #delete enemies that were flagged for completion
-        for i in xrange(len(myDeleteList)):
-            del myEnemies[myDeleteList[i]-i]
-
-        if myHealth <= 0:
-            lost = True
-            exiting = True
-            largeMessageDisplay("YOU LOSE")
-            gameDisplay.fill(black)
-            largeMessageDisplay(str(score) + " pts")
-        drawObject("Rocket.png", x, y)
-        smallMessageDisplay("Health: " + str(myHealth), 0)
-        smallMessageDisplay("Ammo: " + str(ammo), 1)
-        smallMessageDisplay("Level: " + str(currentLevel), 2)
-        smallMessageDisplay("Score: " + str(score), 3)
-        starMoveSpeed = max(minimumStarMoveSpeed, starMoveSpeed - .05)
-        pygame.display.update()
-        clock.tick(60)
+        myProjectiles, myEnemies, myHealth, score, enemiesAlive = moveAndDrawProjectilesAndEnemies(
+            myProjectiles, myEnemies, display_height, myHealth, score, enemiesAlive, x, y, rocketWidth, rocketHeight)
+        lost, exiting = testIfPlayerLost(myHealth, exiting, score)
+        drawPlayer(x, y)
+        drawGameStats(myHealth, ammo, currentLevel, score)
+        starMoveSpeed = adjustStarMoveSpeed(minimumStarMoveSpeed, starMoveSpeed, .05)
+        updateScreenAndLimitFPS(60)
         
     #OUT OF THE GAME LOOP
     if lost == True:
@@ -305,8 +326,8 @@ black = (0,0,0)
 white = (255,255,255)
 red = (255,0,0)
 clock = pygame.time.Clock()
-display_width = 1280
-display_height = 720
+display_width = 1024
+display_height = 768
 myCharacter = ""
 gameDisplay = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption('Spacing Out')
