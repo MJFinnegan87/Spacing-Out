@@ -65,7 +65,7 @@ def loadBulletInfoIntomyProjectilesMatrix(gunType, belongsToEnemy, dx):
         dx = 0
     if gunType == "Teleport":
         bulletWidth = 40
-        bulletLength = 800 #screen height
+        bulletLength = display_height
         speed = 15
         r = 0
         g = 255
