@@ -126,8 +126,7 @@ def enemy(species):
 
 def enemyMovementAI(enemyInfo):
     if enemyInfo[0] == "Enemy Bullet - Teleport": #Here, we're moving the teleport bullet like an enemy, since it needs to move with the UFO
-        #  bulletx + enemywidth
-        if enemyInfo[1] + enemy(0)[10] > display_width or enemyInfo[1] + enemyInfo[10] <0:
+        if (enemyInfo[1] - ((enemy(0)[10] - enemyInfo[3])/2.0)) + enemy(0)[10] + enemyInfo[10] > display_width or enemyInfo[1] - ((enemy(0)[10] - enemyInfo[3])/2.0) + enemyInfo[10] <0:
             enemyInfo[10] = -enemyInfo[10]
         return enemyInfo[10]
     else: #Otherwise, if we're not dealing with the teleport bullet, we're dealing with an actual enemy object:
@@ -344,9 +343,8 @@ def updateHighScores(highScoresArray):
     connection.commit()
     connection.close()
 
-def mainMenu():
+def mainMenu(screenSizeSelection):
     difficultySelection = 0
-    screenSizeSelection = 2
     difficultyChoices = ["Easy", "Medium", "Difficult", "You already lost lol"]
     screenSizeChoices = [(640, 480), (800, 600), (1024, 768), (1280, 720), (1920, 1080)]
     score = 0
@@ -364,19 +362,26 @@ def mainMenu():
     rocketYDelta = 0
     rocketYDeltaWas = 0
     rocketXDeltaWas = 0
-    rocketWidth = 0
-    rocketHeight = 0
+    rocketWidth = 48
+    rocketHeight = 66
     myProjectiles = []
     myEnemies = []
     currentGun = ""
     rocketAccel = 25
-    x = display_width/2
-    y = display_height/2
-    highScores = loadHighScores()
-    global gameDisplay
     global display_width
     global display_height
+    global gameDisplay
+    x = (display_width/2)-(rocketWidth/2)
+    y = (display_height-rocketHeight)
+    highScores = loadHighScores()
+    colorIntensity = 255
+    colorIntensityDirection = 5
     while exiting == False:
+        if colorIntensity + colorIntensityDirection > 255:
+            colorIntensityDirection = -5
+        elif colorIntensity + colorIntensityDirection < 64:
+            colorIntensityDirection = 5
+        colorIntensity = colorIntensity + colorIntensityDirection
         smallText = pygame.font.Font("freesansbold.ttf", 24)
         largeText = pygame.font.Font("freesansbold.ttf", 48)
         textSurf, textRect = textObjects("Spacing Out", largeText, white)
@@ -388,6 +393,7 @@ def mainMenu():
         starMoveSpeed = adjustStarMoveSpeed(minimumStarMoveSpeed, starMoveSpeed, .05)
         myProjectiles, myEnemies, myHealth, score, enemiesAlive, y = moveAndDrawProjectilesAndEnemies(
             myProjectiles, myEnemies, myHealth, score, enemiesAlive, x, y, rocketWidth, rocketHeight)
+        drawObject(myCharacter, x, y)
         for i in xrange(6):
             if i == 5:
                 text = "Play"
@@ -402,7 +408,7 @@ def mainMenu():
             if i == 0:
                 text = "Quit"
             if i == menuSelectionIndex:
-                rgb = (255, 0, 0)
+                rgb = (colorIntensity, 0, 0)
             else:
                 rgb = (255, 255, 255)
             textSurf, textRect = textObjects(text, smallText, rgb)
@@ -414,20 +420,24 @@ def mainMenu():
         if rocketYDelta == -rocketAccel and rocketYDeltaWas == 0 and menuSelectionIndex < 5:
             menuSelectionIndex = menuSelectionIndex + 1
         if ((rocketXDelta == rocketAccel and rocketXDeltaWas == 0) or (enterPressed == True)) and menuSelectionIndex == 4:
-            difficultySelection = (difficultySelection + 1) %4
+            difficultySelection = (difficultySelection + 1) %len(difficultyChoices)
         if (rocketXDelta == -rocketAccel and rocketXDeltaWas == 0) and menuSelectionIndex == 4:
-            difficultySelection = (difficultySelection - 1) %4
+            difficultySelection = (difficultySelection - 1) %len(difficultyChoices)
         if ((rocketXDelta == rocketAccel and rocketXDeltaWas == 0) or (enterPressed == True)) and menuSelectionIndex == 2:
-            screenSizeSelection = (screenSizeSelection + 1) %5
+            screenSizeSelection = (screenSizeSelection + 1) %len(screenSizeChoices)
         if (rocketXDelta == -rocketAccel and rocketXDeltaWas == 0) and menuSelectionIndex == 2:
-            screenSizeSelection = (screenSizeSelection - 1) %5
+            screenSizeSelection = (screenSizeSelection - 1) %len(screenSizeChoices)
         if (((rocketXDelta == rocketAccel and rocketXDeltaWas == 0) or (enterPressed == True)) and menuSelectionIndex == 2) or ((rocketXDelta == -rocketAccel and rocketXDeltaWas == 0) and menuSelectionIndex == 2):
             display_width = screenSizeChoices[screenSizeSelection][0]
-            display_height = screenSizeChoices[screenSizeSelection][1]
+            display_height = screenSizeChoices[screenSizeSelection][1] - 25
             gameDisplay = pygame.display.set_mode((display_width, display_height))
             myProjectiles = []
+            x = (display_width/2)-(rocketWidth/2)
+            y = (display_height-rocketHeight)
         if enterPressed == True and menuSelectionIndex == 5:
-            gameLoop(difficultySelection)
+            gameLoop(difficultySelection, screenSizeSelection)
+        if enterPressed == True and menuSelectionIndex == 0:
+            exiting = True
         rocketYDeltaWas = rocketYDelta
         rocketXDeltaWas = rocketXDelta
         updateScreenAndLimitFPS(60)
@@ -438,7 +448,7 @@ def mainMenu():
 def pause():
     pass
     
-def gameLoop(difficultySelection):
+def gameLoop(difficultySelection, screenSizeSelection):
     # INITIALIZATION
     exiting = False
     lost = False
@@ -486,7 +496,7 @@ def gameLoop(difficultySelection):
         
     #OUT OF THE GAME LOOP
     if lost == True:
-        mainMenu()
+        mainMenu(screenSizeSelection)
     pygame.quit()
     quit()
 
@@ -496,12 +506,12 @@ white = (255,255,255)
 red = (255,0,0)
 clock = pygame.time.Clock()
 display_width = 1024
-display_height = 768
+display_height = 768 - 25
 myCharacter = pygame.image.load("Rocket.png")
 UFO = pygame.image.load("Ufo.png")
 BlueBomber = pygame.image.load("Blue Bomber.png")
 HJet = pygame.image.load("H Jet.png")
 gameDisplay = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption('Spacing Out')
-mainMenu()
+mainMenu(2)
 gameLoop()
