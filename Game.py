@@ -348,7 +348,6 @@ def mainMenu(screenSizeSelection, difficultySelection, displayType):
     difficultyChoices = ["Easy", "Medium", "Difficult", "You already lost lol"]
     screenSizeChoices = pygame.display.list_modes()
     screenSizeChoices.sort()
-    #screenSizeChoices = [(640, 480), (800, 600), (1024, 768), (1280, 720), (1920, 1080)]
     score = 0
     myHealth = 100
     currentLevel = 0
@@ -527,5 +526,5 @@ BlueBomber = pygame.image.load("Blue Bomber.png")
 HJet = pygame.image.load("H Jet.png")
 gameDisplay = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption('Spacing Out')
-mainMenu(2, 0, "Window")
+mainMenu(int(len(pygame.display.list_modes())/2.0), 0, "Window")
 gameLoop()
