@@ -26,7 +26,7 @@ def smallMessageDisplay(text, lineNumber):
 def drawObject(myObject, x, y):
     gameDisplay.blit(myObject,(x,y))
 
-def loadBulletInfoIntomyProjectilesMatrix(gunType, belongsToEnemy, dx):
+def loadBulletInfoIntomyProjectilesMatrix(gunType, belongsToEnemy, dx, difficultySelection):
     if gunType == "Basic Gun":
         bulletWidth = 1
         bulletLength = 3
@@ -73,7 +73,7 @@ def loadBulletInfoIntomyProjectilesMatrix(gunType, belongsToEnemy, dx):
         damage = 40
     if belongsToEnemy == True:
         speed = -speed
-        damage = damage * .05
+        damage = damage * (.05 * (1+difficultySelection))
         returnString = "Enemy Bullet - "
     else:
         returnString = "My Bullet - "
@@ -150,10 +150,10 @@ def enemyMovementAI(enemyInfo):
                 enemyInfo[8] = -enemyInfo[8]
         return enemyInfo
 
-def enemyAttackAI(aggressionLevel):
-    return random.randint(1, int((1/float(aggressionLevel)) * 120))
+def enemyAttackAI(aggressionLevel, difficultySelection):
+    return random.randint(1, int((1/float(aggressionLevel)) * (120/float(1.0 + difficultySelection))))
 
-def handleKeyPresses(ammo, currentGun, myProjectiles, rocketAccel, x, y, rocketWidth):
+def handleKeyPresses(ammo, currentGun, myProjectiles, rocketAccel, x, y, rocketWidth, difficultySelection):
     #HANDLE KEY PRESS/RELEASE/USER ACTIONS
     keys = pygame.key.get_pressed()
     exiting = False
@@ -165,7 +165,7 @@ def handleKeyPresses(ammo, currentGun, myProjectiles, rocketAccel, x, y, rocketW
             enterPressed = True
         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and ammo >0: #MAKE USER NEED TO PRESS SPACE OVER AND OVER TO FIRE
             ammo = ammo - 1
-            bulletProperties = loadBulletInfoIntomyProjectilesMatrix(currentGun, False, 0)
+            bulletProperties = loadBulletInfoIntomyProjectilesMatrix(currentGun, False, 0, difficultySelection)
             myProjectiles.append([bulletProperties[0], x + (rocketWidth/2) - int((bulletProperties[1]/2)) , y , bulletProperties[1], bulletProperties[2], bulletProperties[3], bulletProperties[4], bulletProperties[5], bulletProperties[6], bulletProperties[7], 0])
             #print "Firing! Damage: " + str(myProjectiles[len(myProjectiles)-1][9])
     rocketXDelta = 0
@@ -207,7 +207,7 @@ def movePlayer(x, y, rocketWidth, rocketHeight, rocketXDelta, rocketYDelta):
     y = y + rocketYDelta
     return x, y
 
-def moveAndDrawProjectilesAndEnemies(myProjectiles, myEnemies, myHealth, score, enemiesAlive, x, y, rocketWidth, rocketHeight):
+def moveAndDrawProjectilesAndEnemies(myProjectiles, myEnemies, myHealth, score, enemiesAlive, x, y, rocketWidth, rocketHeight, difficultySelection):
     myDeleteList = []
     
     for i in xrange(len(myProjectiles)): #for each bullet and star
@@ -257,8 +257,8 @@ def moveAndDrawProjectilesAndEnemies(myProjectiles, myEnemies, myHealth, score, 
             score = score + 1
             myDeleteList.append(i) #flag this enemy for deletion
         else:
-            if enemyAttackAI(myEnemies[i][3]) == 1: #decide if enemy will attack
-                bulletProperties = loadBulletInfoIntomyProjectilesMatrix(myEnemies[i][1], True, myEnemies[i][8]) #if the enemy is attacking, then load the bullet in the projectile matrix
+            if enemyAttackAI(myEnemies[i][3], difficultySelection) == 1: #decide if enemy will attack
+                bulletProperties = loadBulletInfoIntomyProjectilesMatrix(myEnemies[i][1], True, myEnemies[i][8], difficultySelection) #if the enemy is attacking, then load the bullet in the projectile matrix
                 myProjectiles.append([bulletProperties[0], myEnemies[i][6] + (myEnemies[i][10]/2) - (bulletProperties[1]/2), myEnemies[i][7] , bulletProperties[1], bulletProperties[2], bulletProperties[3], bulletProperties[4], bulletProperties[5], bulletProperties[6], bulletProperties[7], bulletProperties[8]])
             myEnemies[i][6] = myEnemies[i][6] + myEnemies[i][8] #move this enemy
             myEnemies[i][7] = myEnemies[i][7] + myEnemies[i][9]
@@ -343,10 +343,12 @@ def updateHighScores(highScoresArray):
     connection.commit()
     connection.close()
 
-def mainMenu(screenSizeSelection):
-    difficultySelection = 0
+def mainMenu(screenSizeSelection, difficultySelection, displayType):
+    fullScreenWindowChanged = True
     difficultyChoices = ["Easy", "Medium", "Difficult", "You already lost lol"]
-    screenSizeChoices = [(640, 480), (800, 600), (1024, 768), (1280, 720), (1920, 1080)]
+    screenSizeChoices = pygame.display.list_modes()
+    screenSizeChoices.sort()
+    #screenSizeChoices = [(640, 480), (800, 600), (1024, 768), (1280, 720), (1920, 1080)]
     score = 0
     myHealth = 100
     currentLevel = 0
@@ -356,7 +358,7 @@ def mainMenu(screenSizeSelection):
     starProbabilitySpace = 1000 #IF STARDENSITY = .5, THEN 50% PROBABILITY NEW LINE WILL CONTAIN STAR. RAND # GENERATOR WOULD HAVE TO GENERATE 1 THROUGH (.5*1000) FOR .5 PROB TO BE TRUE
     minimumStarMoveSpeed = 1.05
     exiting = False
-    menuSelectionIndex = 5
+    menuSelectionIndex = 6
     ammo = 0
     rocketXDelta = 0
     rocketYDelta = 0
@@ -387,22 +389,24 @@ def mainMenu(screenSizeSelection):
         textSurf, textRect = textObjects("Spacing Out", largeText, white)
         textRect.center = ((display_width/2), (25))
         gameDisplay.blit(textSurf, textRect)
-        exiting, ammo, myProjectiles, rocketXDelta, rocketYDelta, enterPressed = handleKeyPresses(ammo, currentGun, myProjectiles, rocketAccel, x, y, rocketWidth)
+        exiting, ammo, myProjectiles, rocketXDelta, rocketYDelta, enterPressed = handleKeyPresses(ammo, currentGun, myProjectiles, rocketAccel, x, y, rocketWidth, difficultySelection)
         currentLevel, currentGun, enemiesAlive, myEnemies, myProjectiles = addGameObjects(
             enemiesAlive, currentLevel, currentGun, myEnemies, starProbabilitySpace, starDensity, starMoveSpeed, myProjectiles)
         starMoveSpeed = adjustStarMoveSpeed(minimumStarMoveSpeed, starMoveSpeed, .05)
         myProjectiles, myEnemies, myHealth, score, enemiesAlive, y = moveAndDrawProjectilesAndEnemies(
-            myProjectiles, myEnemies, myHealth, score, enemiesAlive, x, y, rocketWidth, rocketHeight)
+            myProjectiles, myEnemies, myHealth, score, enemiesAlive, x, y, rocketWidth, rocketHeight, difficultySelection)
         drawObject(myCharacter, x, y)
-        for i in xrange(6):
-            if i == 5:
+        for i in xrange(7):
+            if i == 6:
                 text = "Play"
-            if i == 4:
+            if i == 5:
                 text = "Difficulty: " + difficultyChoices[difficultySelection]
-            if i == 3:
+            if i == 4:
                 text = "High Scores"
-            if i == 2:
+            if i == 3:
                 text = "Screen Size: " + str(screenSizeChoices[screenSizeSelection][0]) + "x" + str(screenSizeChoices[screenSizeSelection][1])
+            if i == 2:
+                text = "Screen: " + displayType
             if i == 1:
                 text = "Credits"
             if i == 0:
@@ -417,25 +421,35 @@ def mainMenu(screenSizeSelection):
         
         if rocketYDelta == rocketAccel and rocketYDeltaWas == 0 and menuSelectionIndex >0:
             menuSelectionIndex = menuSelectionIndex - 1
-        if rocketYDelta == -rocketAccel and rocketYDeltaWas == 0 and menuSelectionIndex < 5:
+        if rocketYDelta == -rocketAccel and rocketYDeltaWas == 0 and menuSelectionIndex < 6:
             menuSelectionIndex = menuSelectionIndex + 1
-        if ((rocketXDelta == rocketAccel and rocketXDeltaWas == 0) or (enterPressed == True)) and menuSelectionIndex == 4:
+        if ((rocketXDelta == rocketAccel and rocketXDeltaWas == 0) or (enterPressed == True)) and menuSelectionIndex == 5:
             difficultySelection = (difficultySelection + 1) %len(difficultyChoices)
-        if (rocketXDelta == -rocketAccel and rocketXDeltaWas == 0) and menuSelectionIndex == 4:
+        if (rocketXDelta == -rocketAccel and rocketXDeltaWas == 0) and menuSelectionIndex == 5:
             difficultySelection = (difficultySelection - 1) %len(difficultyChoices)
-        if ((rocketXDelta == rocketAccel and rocketXDeltaWas == 0) or (enterPressed == True)) and menuSelectionIndex == 2:
+        if ((rocketXDelta == rocketAccel and rocketXDeltaWas == 0) or (enterPressed == True)) and menuSelectionIndex == 3:
             screenSizeSelection = (screenSizeSelection + 1) %len(screenSizeChoices)
-        if (rocketXDelta == -rocketAccel and rocketXDeltaWas == 0) and menuSelectionIndex == 2:
+        if (rocketXDelta == -rocketAccel and rocketXDeltaWas == 0) and menuSelectionIndex == 3:
             screenSizeSelection = (screenSizeSelection - 1) %len(screenSizeChoices)
-        if (((rocketXDelta == rocketAccel and rocketXDeltaWas == 0) or (enterPressed == True)) and menuSelectionIndex == 2) or ((rocketXDelta == -rocketAccel and rocketXDeltaWas == 0) and menuSelectionIndex == 2):
+        if (enterPressed == True or (abs(rocketXDelta) == rocketAccel and rocketXDeltaWas == 0))and menuSelectionIndex == 2:
+            if displayType == "Window":
+                displayType = "Full Screen"
+            else:
+                displayType = "Window"
+            fullScreenWindowChanged = True
+        if ((((rocketXDelta == rocketAccel and rocketXDeltaWas == 0) or (enterPressed == True)) and menuSelectionIndex == 3) or ((rocketXDelta == -rocketAccel and rocketXDeltaWas == 0) and menuSelectionIndex == 3)) or fullScreenWindowChanged == True:
             display_width = screenSizeChoices[screenSizeSelection][0]
             display_height = screenSizeChoices[screenSizeSelection][1] - 25
-            gameDisplay = pygame.display.set_mode((display_width, display_height))
+            if displayType == "Window":
+                gameDisplay = pygame.display.set_mode((display_width, display_height))
+            else:
+                gameDisplay = pygame.display.set_mode((display_width, display_height), pygame.FULLSCREEN)
             myProjectiles = []
             x = (display_width/2)-(rocketWidth/2)
             y = (display_height-rocketHeight)
-        if enterPressed == True and menuSelectionIndex == 5:
-            gameLoop(difficultySelection, screenSizeSelection)
+            fullScreenWindowChanged = False
+        if enterPressed == True and menuSelectionIndex == 6:
+            gameLoop(difficultySelection, screenSizeSelection, displayType)
         if enterPressed == True and menuSelectionIndex == 0:
             exiting = True
         rocketYDeltaWas = rocketYDelta
@@ -448,7 +462,7 @@ def mainMenu(screenSizeSelection):
 def pause():
     pass
     
-def gameLoop(difficultySelection, screenSizeSelection):
+def gameLoop(difficultySelection, screenSizeSelection, displayType):
     # INITIALIZATION
     exiting = False
     lost = False
@@ -483,11 +497,11 @@ def gameLoop(difficultySelection, screenSizeSelection):
         currentLevel, currentGun, enemiesAlive, myEnemies, myProjectiles = addGameObjects(
             enemiesAlive, currentLevel, currentGun, myEnemies, starProbabilitySpace, starDensity, starMoveSpeed, myProjectiles)
         exiting, ammo, myProjectiles, rocketXDelta, rocketYDelta, enterPressed = handleKeyPresses(
-            ammo, currentGun, myProjectiles, rocketAccel, x, y, rocketWidth) 
+            ammo, currentGun, myProjectiles, rocketAccel, x, y, rocketWidth, difficultySelection) 
         x, y = movePlayer(x, y, rocketWidth, rocketHeight, rocketXDelta, rocketYDelta)
         gameDisplay.fill(black)
         myProjectiles, myEnemies, myHealth, score, enemiesAlive, y = moveAndDrawProjectilesAndEnemies(
-            myProjectiles, myEnemies, myHealth, score, enemiesAlive, x, y, rocketWidth, rocketHeight)
+            myProjectiles, myEnemies, myHealth, score, enemiesAlive, x, y, rocketWidth, rocketHeight, difficultySelection)
         lost, exiting = testIfPlayerLost(myHealth, exiting, score)
         drawObject(myCharacter, x, y)
         drawGameStats(myHealth, ammo, currentLevel, score)
@@ -496,7 +510,7 @@ def gameLoop(difficultySelection, screenSizeSelection):
         
     #OUT OF THE GAME LOOP
     if lost == True:
-        mainMenu(screenSizeSelection)
+        mainMenu(screenSizeSelection, difficultySelection, displayType)
     pygame.quit()
     quit()
 
@@ -513,5 +527,5 @@ BlueBomber = pygame.image.load("Blue Bomber.png")
 HJet = pygame.image.load("H Jet.png")
 gameDisplay = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption('Spacing Out')
-mainMenu(2)
+mainMenu(2, 0, "Window")
 gameLoop()
