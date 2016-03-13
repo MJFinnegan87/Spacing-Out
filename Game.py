@@ -336,7 +336,7 @@ def updateHighScores(highScoresArray):
     connection = sqlite3.connect("High_Scores.db")
     c = connection.cursor()
     c.execute("DROP TABLE IF EXISTS HighScoreTable")
-    c.execute("CREATE TABLE HighScoreTable(scoreRecordPK INT, Name TEXT, Score INT)")
+    c.execute("CREATE TABLE HighScoreTable(scoreRecordPK INT, Name TEXT, Score INT, State TEXT, Country TEXT)")
     i = -1
     for row in highScoresArray:
         i = i + 1
