@@ -296,8 +296,8 @@ def drawGameStats(myHealth, ammo, currentLevel, score):
     smallMessageDisplay("Level: " + str(currentLevel), 2)
     smallMessageDisplay("Score: " + str(score), 3)
 
-def adjustStarMoveSpeed(minimumStarMoveSpeed, starMoveSpeed, decriment):
-    return max(minimumStarMoveSpeed, starMoveSpeed - decriment)  
+def adjustStarMoveSpeed(maximumStarMoveSpeed):
+    return (.25*random.randint(1,4)) * maximumStarMoveSpeed  
 
 def updateScreenAndLimitFPS(FPSLimit):
     pygame.display.update()
@@ -344,18 +344,16 @@ def updateHighScores(highScoresArray):
     connection.close()
 
 def mainMenu(screenSizeSelection, difficultySelection, displayType):
-    fullScreenWindowChanged = True
+    menuJustOpened = True
     difficultyChoices = ["Easy", "Medium", "Difficult", "You already lost lol"]
-    screenSizeChoices = pygame.display.list_modes()
-    screenSizeChoices.sort()
     score = 0
     myHealth = 100
     currentLevel = 0
     enemiesAlive = 1
-    starMoveSpeed = 5
-    starDensity = .2 #PROBABILITY A NEW LINE CONTAINS A STAR x100%
+    starDensity = .1 #PROBABILITY A NEW LINE CONTAINS A STAR x100%
     starProbabilitySpace = 1000 #IF STARDENSITY = .5, THEN 50% PROBABILITY NEW LINE WILL CONTAIN STAR. RAND # GENERATOR WOULD HAVE TO GENERATE 1 THROUGH (.5*1000) FOR .5 PROB TO BE TRUE
-    minimumStarMoveSpeed = 1.05
+    maximumStarMoveSpeed = 2.1
+    starMoveSpeed = maximumStarMoveSpeed
     exiting = False
     menuSelectionIndex = 6
     ammo = 0
@@ -391,7 +389,7 @@ def mainMenu(screenSizeSelection, difficultySelection, displayType):
         exiting, ammo, myProjectiles, rocketXDelta, rocketYDelta, enterPressed = handleKeyPresses(ammo, currentGun, myProjectiles, rocketAccel, x, y, rocketWidth, difficultySelection)
         currentLevel, currentGun, enemiesAlive, myEnemies, myProjectiles = addGameObjects(
             enemiesAlive, currentLevel, currentGun, myEnemies, starProbabilitySpace, starDensity, starMoveSpeed, myProjectiles)
-        starMoveSpeed = adjustStarMoveSpeed(minimumStarMoveSpeed, starMoveSpeed, .05)
+        starMoveSpeed = adjustStarMoveSpeed(maximumStarMoveSpeed)
         myProjectiles, myEnemies, myHealth, score, enemiesAlive, y = moveAndDrawProjectilesAndEnemies(
             myProjectiles, myEnemies, myHealth, score, enemiesAlive, x, y, rocketWidth, rocketHeight, difficultySelection)
         drawObject(myCharacter, x, y)
@@ -403,9 +401,9 @@ def mainMenu(screenSizeSelection, difficultySelection, displayType):
             if i == 4:
                 text = "High Scores"
             if i == 3:
-                text = "Screen Size: " + str(screenSizeChoices[screenSizeSelection][0]) + "x" + str(screenSizeChoices[screenSizeSelection][1])
+                text = "How To Play"
             if i == 2:
-                text = "Screen: " + displayType
+                text = "Settings"
             if i == 1:
                 text = "Credits"
             if i == 0:
@@ -417,26 +415,111 @@ def mainMenu(screenSizeSelection, difficultySelection, displayType):
             textSurf, textRect = textObjects(text, smallText, rgb)
             textRect.center = ((display_width/2), (display_height/2 - i*(rocketAccel)))
             gameDisplay.blit(textSurf, textRect)
+        if menuJustOpened == False:
+            if rocketYDelta == rocketAccel and rocketYDeltaWas == 0 and menuSelectionIndex >0:
+                menuSelectionIndex = menuSelectionIndex - 1
+            if rocketYDelta == -rocketAccel and rocketYDeltaWas == 0 and menuSelectionIndex < 6:
+                menuSelectionIndex = menuSelectionIndex + 1
+            if ((rocketXDelta == rocketAccel and rocketXDeltaWas == 0) or (enterPressed == True)) and menuSelectionIndex == 5:
+                difficultySelection = (difficultySelection + 1) %len(difficultyChoices)
+            if (rocketXDelta == -rocketAccel and rocketXDeltaWas == 0) and menuSelectionIndex == 5:
+                difficultySelection = (difficultySelection - 1) %len(difficultyChoices)
+            if enterPressed == True and menuSelectionIndex == 2:
+                myProjectiles, x, y, displayType, screenSizeSelection = settingsMenu(myProjectiles, difficultySelection, displayType, screenSizeSelection, starMoveSpeed)
+            if enterPressed == True and menuSelectionIndex == 6:
+                gameLoop(difficultySelection, screenSizeSelection, displayType)
+            if enterPressed == True and menuSelectionIndex == 0:
+                exiting = True
+            rocketYDeltaWas = rocketYDelta
+            rocketXDeltaWas = rocketXDelta
+            updateScreenAndLimitFPS(60)
+            gameDisplay.fill(black)
+        menuJustOpened = False
+    pygame.quit()
+    quit()
+
+def settingsMenu(myProjectiles, difficultySelection, displayType, screenSizeSelection, starMoveSpeed):
+    fullScreenWindowChanged = False
+    screenSizeChoices = pygame.display.list_modes()
+    screenSizeChoices.sort()
+    score = 0
+    myHealth = 100
+    currentLevel = 0
+    enemiesAlive = 1
+    starDensity = .1 #PROBABILITY A NEW LINE CONTAINS A STAR x100%
+    starProbabilitySpace = 1000 #IF STARDENSITY = .5, THEN 50% PROBABILITY NEW LINE WILL CONTAIN STAR. RAND # GENERATOR WOULD HAVE TO GENERATE 1 THROUGH (.5*1000) FOR .5 PROB TO BE TRUE
+    maximumStarMoveSpeed = 2.1
+    exiting = False
+    menuSelectionIndex = 4
+    ammo = 0
+    rocketXDelta = 0
+    rocketYDelta = 0
+    rocketYDeltaWas = 0
+    rocketXDeltaWas = 0
+    rocketWidth = 48
+    rocketHeight = 66
+    myEnemies = []
+    currentGun = ""
+    rocketAccel = 25
+    global display_width
+    global display_height
+    global gameDisplay
+    x = (display_width/2)-(rocketWidth/2)
+    y = (display_height-rocketHeight)
+    colorIntensity = 255
+    colorIntensityDirection = 5
+    while exiting == False:
+        if colorIntensity + colorIntensityDirection > 255:
+            colorIntensityDirection = -5
+        elif colorIntensity + colorIntensityDirection < 64:
+            colorIntensityDirection = 5
+        colorIntensity = colorIntensity + colorIntensityDirection
+        smallText = pygame.font.Font("freesansbold.ttf", 24)
+        largeText = pygame.font.Font("freesansbold.ttf", 48)
+        textSurf, textRect = textObjects("Spacing Out", largeText, white)
+        textRect.center = ((display_width/2), (25))
+        gameDisplay.blit(textSurf, textRect)
+        exiting, ammo, myProjectiles, rocketXDelta, rocketYDelta, enterPressed = handleKeyPresses(ammo, currentGun, myProjectiles, rocketAccel, x, y, rocketWidth, difficultySelection)
+        currentLevel, currentGun, enemiesAlive, myEnemies, myProjectiles = addGameObjects(
+            enemiesAlive, currentLevel, currentGun, myEnemies, starProbabilitySpace, starDensity, starMoveSpeed, myProjectiles)
+        starMoveSpeed = adjustStarMoveSpeed(maximumStarMoveSpeed)
+        myProjectiles, myEnemies, myHealth, score, enemiesAlive, y = moveAndDrawProjectilesAndEnemies(
+            myProjectiles, myEnemies, myHealth, score, enemiesAlive, x, y, rocketWidth, rocketHeight, difficultySelection)
+        drawObject(myCharacter, x, y)
+        for i in xrange(5):
+            if i == 4:
+                text = "Screen Size: " + str(screenSizeChoices[screenSizeSelection][0]) + "x" + str(screenSizeChoices[screenSizeSelection][1])
+            if i == 3:
+                text = "Screen: " + displayType
+            if i == 2:
+                text = "Music Volume: 100"
+            if i == 1:
+                text = "SFX Volume: 100"
+            if i == 0:
+                text = "Go Back"
+            if i == menuSelectionIndex:
+                rgb = (colorIntensity, 0, 0)
+            else:
+                rgb = (255, 255, 255)
+            textSurf, textRect = textObjects(text, smallText, rgb)
+            textRect.center = ((display_width/2), (display_height/2 - i*(rocketAccel)))
+            gameDisplay.blit(textSurf, textRect)
         
         if rocketYDelta == rocketAccel and rocketYDeltaWas == 0 and menuSelectionIndex >0:
             menuSelectionIndex = menuSelectionIndex - 1
-        if rocketYDelta == -rocketAccel and rocketYDeltaWas == 0 and menuSelectionIndex < 6:
+        if rocketYDelta == -rocketAccel and rocketYDeltaWas == 0 and menuSelectionIndex < 4:
             menuSelectionIndex = menuSelectionIndex + 1
-        if ((rocketXDelta == rocketAccel and rocketXDeltaWas == 0) or (enterPressed == True)) and menuSelectionIndex == 5:
-            difficultySelection = (difficultySelection + 1) %len(difficultyChoices)
-        if (rocketXDelta == -rocketAccel and rocketXDeltaWas == 0) and menuSelectionIndex == 5:
-            difficultySelection = (difficultySelection - 1) %len(difficultyChoices)
-        if ((rocketXDelta == rocketAccel and rocketXDeltaWas == 0) or (enterPressed == True)) and menuSelectionIndex == 3:
+        if ((rocketXDelta == rocketAccel and rocketXDeltaWas == 0) or (enterPressed == True)) and menuSelectionIndex == 4:
             screenSizeSelection = (screenSizeSelection + 1) %len(screenSizeChoices)
-        if (rocketXDelta == -rocketAccel and rocketXDeltaWas == 0) and menuSelectionIndex == 3:
+        if (rocketXDelta == -rocketAccel and rocketXDeltaWas == 0) and menuSelectionIndex == 4:
             screenSizeSelection = (screenSizeSelection - 1) %len(screenSizeChoices)
-        if (enterPressed == True or (abs(rocketXDelta) == rocketAccel and rocketXDeltaWas == 0))and menuSelectionIndex == 2:
+        if (enterPressed == True or (abs(rocketXDelta) == rocketAccel and rocketXDeltaWas == 0))and menuSelectionIndex == 3:
             if displayType == "Window":
                 displayType = "Full Screen"
             else:
                 displayType = "Window"
             fullScreenWindowChanged = True
-        if ((((rocketXDelta == rocketAccel and rocketXDeltaWas == 0) or (enterPressed == True)) and menuSelectionIndex == 3) or ((rocketXDelta == -rocketAccel and rocketXDeltaWas == 0) and menuSelectionIndex == 3)) or fullScreenWindowChanged == True:
+        if ((((rocketXDelta == rocketAccel and rocketXDeltaWas == 0) or (enterPressed == True)) and menuSelectionIndex == 4) or ((rocketXDelta == -rocketAccel and rocketXDeltaWas == 0) and menuSelectionIndex == 4)) or fullScreenWindowChanged == True:
             display_width = screenSizeChoices[screenSizeSelection][0]
             display_height = screenSizeChoices[screenSizeSelection][1] - 25
             if displayType == "Window":
@@ -450,13 +533,13 @@ def mainMenu(screenSizeSelection, difficultySelection, displayType):
         if enterPressed == True and menuSelectionIndex == 6:
             gameLoop(difficultySelection, screenSizeSelection, displayType)
         if enterPressed == True and menuSelectionIndex == 0:
-            exiting = True
+            return myProjectiles, x, y, displayType, screenSizeSelection
         rocketYDeltaWas = rocketYDelta
         rocketXDeltaWas = rocketXDelta
         updateScreenAndLimitFPS(60)
         gameDisplay.fill(black)
     pygame.quit()
-    quit()
+    quit()    
 
 def pause():
     pass
@@ -474,13 +557,13 @@ def gameLoop(difficultySelection, screenSizeSelection, displayType):
     myHealth = 100
     myProjectiles = [] #[NAME, X1, Y1, WIDTH, HEIGHT, R, G, B, SPEED, 0]
     myEnemies = [] #[species, weapon, health, aggression, speed, img, x, y, dx, dy, width, height]
-    minimumStarMoveSpeed = 1.05
+    maximumStarMoveSpeed = 2.1
     rocketAccel = 10
     rocketXDelta = 0
     rocketYDelta = 0
     starCount = 0
-    starMoveSpeed = 5
-    starDensity = .2 #PROBABILITY A NEW LINE CONTAINS A STAR x100%
+    starMoveSpeed = maximumStarMoveSpeed
+    starDensity = .1 #PROBABILITY A NEW LINE CONTAINS A STAR x100%
     starProbabilitySpace = 1000 #IF STARDENSITY = .5, THEN 50% PROBABILITY NEW LINE WILL CONTAIN STAR. RAND # GENERATOR WOULD HAVE TO GENERATE 1 THROUGH (.5*1000) FOR .5 PROB TO BE TRUE
     score = 0
     x = (display_width/2)-(rocketWidth/2)
@@ -504,7 +587,7 @@ def gameLoop(difficultySelection, screenSizeSelection, displayType):
         lost, exiting = testIfPlayerLost(myHealth, exiting, score)
         drawObject(myCharacter, x, y)
         drawGameStats(myHealth, ammo, currentLevel, score)
-        starMoveSpeed = adjustStarMoveSpeed(minimumStarMoveSpeed, starMoveSpeed, .05)
+        starMoveSpeed = adjustStarMoveSpeed(maximumStarMoveSpeed)
         updateScreenAndLimitFPS(60)
         
     #OUT OF THE GAME LOOP
@@ -518,8 +601,8 @@ black = (0,0,0)
 white = (255,255,255)
 red = (255,0,0)
 clock = pygame.time.Clock()
-display_width = 1024
-display_height = 768 - 25
+display_width = pygame.display.list_modes()[(int(len(pygame.display.list_modes())/2.0))][0]
+display_height = pygame.display.list_modes()[(int(len(pygame.display.list_modes())/2.0))][1] - 25
 myCharacter = pygame.image.load("Rocket.png")
 UFO = pygame.image.load("Ufo.png")
 BlueBomber = pygame.image.load("Blue Bomber.png")
