@@ -296,8 +296,8 @@ def drawGameStats(myHealth, ammo, currentLevel, score):
     smallMessageDisplay("Level: " + str(currentLevel), 2)
     smallMessageDisplay("Score: " + str(score), 3)
 
-def adjustStarMoveSpeed(maximumStarMoveSpeed):
-    return (.25*random.randint(1,4)) * maximumStarMoveSpeed  
+def adjustStarMoveSpeed(maximumStarMoveSpeed, numberOfStarSpeeds):
+    return ((1/float(numberOfStarSpeeds))*random.randint(1,numberOfStarSpeeds)) * maximumStarMoveSpeed
 
 def updateScreenAndLimitFPS(FPSLimit):
     pygame.display.update()
@@ -345,14 +345,15 @@ def updateHighScores(highScoresArray):
 
 def mainMenu(screenSizeSelection, difficultySelection, displayType):
     menuJustOpened = True
-    difficultyChoices = ["Easy", "Medium", "Difficult", "You already lost lol"]
+    difficultyChoices = ["Easy", "Medium", "Difficult", "Expert", "You already lost lol"]
     score = 0
     myHealth = 100
     currentLevel = 0
     enemiesAlive = 1
     starDensity = .1 #PROBABILITY A NEW LINE CONTAINS A STAR x100%
     starProbabilitySpace = 1000 #IF STARDENSITY = .5, THEN 50% PROBABILITY NEW LINE WILL CONTAIN STAR. RAND # GENERATOR WOULD HAVE TO GENERATE 1 THROUGH (.5*1000) FOR .5 PROB TO BE TRUE
-    maximumStarMoveSpeed = 2.1
+    maximumStarMoveSpeed = 4.1
+    numberOfStarSpeeds = 16
     starMoveSpeed = maximumStarMoveSpeed
     exiting = False
     menuSelectionIndex = 6
@@ -389,7 +390,7 @@ def mainMenu(screenSizeSelection, difficultySelection, displayType):
         exiting, ammo, myProjectiles, rocketXDelta, rocketYDelta, enterPressed = handleKeyPresses(ammo, currentGun, myProjectiles, rocketAccel, x, y, rocketWidth, difficultySelection)
         currentLevel, currentGun, enemiesAlive, myEnemies, myProjectiles = addGameObjects(
             enemiesAlive, currentLevel, currentGun, myEnemies, starProbabilitySpace, starDensity, starMoveSpeed, myProjectiles)
-        starMoveSpeed = adjustStarMoveSpeed(maximumStarMoveSpeed)
+        starMoveSpeed = adjustStarMoveSpeed(maximumStarMoveSpeed, numberOfStarSpeeds)
         myProjectiles, myEnemies, myHealth, score, enemiesAlive, y = moveAndDrawProjectilesAndEnemies(
             myProjectiles, myEnemies, myHealth, score, enemiesAlive, x, y, rocketWidth, rocketHeight, difficultySelection)
         drawObject(myCharacter, x, y)
@@ -448,7 +449,8 @@ def settingsMenu(myProjectiles, difficultySelection, displayType, screenSizeSele
     enemiesAlive = 1
     starDensity = .1 #PROBABILITY A NEW LINE CONTAINS A STAR x100%
     starProbabilitySpace = 1000 #IF STARDENSITY = .5, THEN 50% PROBABILITY NEW LINE WILL CONTAIN STAR. RAND # GENERATOR WOULD HAVE TO GENERATE 1 THROUGH (.5*1000) FOR .5 PROB TO BE TRUE
-    maximumStarMoveSpeed = 2.1
+    numberOfStarSpeeds = 16
+    maximumStarMoveSpeed = 4.1
     exiting = False
     menuSelectionIndex = 4
     ammo = 0
@@ -482,7 +484,7 @@ def settingsMenu(myProjectiles, difficultySelection, displayType, screenSizeSele
         exiting, ammo, myProjectiles, rocketXDelta, rocketYDelta, enterPressed = handleKeyPresses(ammo, currentGun, myProjectiles, rocketAccel, x, y, rocketWidth, difficultySelection)
         currentLevel, currentGun, enemiesAlive, myEnemies, myProjectiles = addGameObjects(
             enemiesAlive, currentLevel, currentGun, myEnemies, starProbabilitySpace, starDensity, starMoveSpeed, myProjectiles)
-        starMoveSpeed = adjustStarMoveSpeed(maximumStarMoveSpeed)
+        starMoveSpeed = adjustStarMoveSpeed(maximumStarMoveSpeed, numberOfStarSpeeds)
         myProjectiles, myEnemies, myHealth, score, enemiesAlive, y = moveAndDrawProjectilesAndEnemies(
             myProjectiles, myEnemies, myHealth, score, enemiesAlive, x, y, rocketWidth, rocketHeight, difficultySelection)
         drawObject(myCharacter, x, y)
@@ -557,12 +559,13 @@ def gameLoop(difficultySelection, screenSizeSelection, displayType):
     myHealth = 100
     myProjectiles = [] #[NAME, X1, Y1, WIDTH, HEIGHT, R, G, B, SPEED, 0]
     myEnemies = [] #[species, weapon, health, aggression, speed, img, x, y, dx, dy, width, height]
-    maximumStarMoveSpeed = 2.1
+    maximumStarMoveSpeed = 4.1
     rocketAccel = 10
     rocketXDelta = 0
     rocketYDelta = 0
     starCount = 0
     starMoveSpeed = maximumStarMoveSpeed
+    numberOfStarSpeeds = 16
     starDensity = .1 #PROBABILITY A NEW LINE CONTAINS A STAR x100%
     starProbabilitySpace = 1000 #IF STARDENSITY = .5, THEN 50% PROBABILITY NEW LINE WILL CONTAIN STAR. RAND # GENERATOR WOULD HAVE TO GENERATE 1 THROUGH (.5*1000) FOR .5 PROB TO BE TRUE
     score = 0
@@ -587,7 +590,7 @@ def gameLoop(difficultySelection, screenSizeSelection, displayType):
         lost, exiting = testIfPlayerLost(myHealth, exiting, score)
         drawObject(myCharacter, x, y)
         drawGameStats(myHealth, ammo, currentLevel, score)
-        starMoveSpeed = adjustStarMoveSpeed(maximumStarMoveSpeed)
+        starMoveSpeed = adjustStarMoveSpeed(maximumStarMoveSpeed, numberOfStarSpeeds)
         updateScreenAndLimitFPS(60)
         
     #OUT OF THE GAME LOOP
