@@ -9,7 +9,7 @@ def textObjects(text, font, color):
     textSurface = font.render(text, True, color)
     return textSurface, textSurface.get_rect()
 
-def largeMessageDisplay(text):
+def largeMessageDisplay(text, display_width, display_height):
     largeText = pygame.font.Font("freesansbold.ttf", 135)
     textSurf, textRect = textObjects(text, largeText, white)
     textRect.center = ((display_width/2), (display_height/2))
@@ -17,7 +17,7 @@ def largeMessageDisplay(text):
     pygame.display.update()
     time.sleep(2)
 
-def smallMessageDisplay(text, lineNumber):
+def smallMessageDisplay(text, lineNumber, display_width):
     smallText = pygame.font.Font("freesansbold.ttf", 16)
     textSurf, textRect = textObjects(text, smallText, white)
     textRect.center = ((display_width-60), 15 + (15*lineNumber))
@@ -26,7 +26,7 @@ def smallMessageDisplay(text, lineNumber):
 def drawObject(myObject, x, y):
     gameDisplay.blit(myObject,(x,y))
 
-def loadBulletInfoIntomyProjectilesMatrix(gunType, belongsToEnemy, dx, difficultySelection):
+def loadBulletInfoIntomyProjectilesMatrix(gunType, belongsToEnemy, dx, difficultySelection, display_height):
     if gunType == "Basic Gun":
         bulletWidth = 1
         bulletLength = 3
@@ -124,7 +124,7 @@ def enemy(species):
     y = 0
     return [species, weapon, health, aggression, speed, img, x, y, dx, dy, width, height]
 
-def enemyMovementAI(enemyInfo):
+def enemyMovementAI(enemyInfo, display_width, display_height):
     if enemyInfo[0] == "Enemy Bullet - Teleport": #Here, we're moving the teleport bullet like an enemy, since it needs to move with the UFO
         if (enemyInfo[1] - ((enemy(0)[10] - enemyInfo[3])/2.0)) + enemy(0)[10] + enemyInfo[10] > display_width or enemyInfo[1] - ((enemy(0)[10] - enemyInfo[3])/2.0) + enemyInfo[10] <0:
             enemyInfo[10] = -enemyInfo[10]
@@ -153,7 +153,7 @@ def enemyMovementAI(enemyInfo):
 def enemyAttackAI(aggressionLevel, difficultySelection):
     return random.randint(1, int((1/float(aggressionLevel)) * (120/float(1.0 + difficultySelection))))
 
-def handleKeyPresses(fromWhere, ammo, currentGun, myProjectiles, rocketAccel, x, y, rocketWidth, difficultySelection, screenSizeSelection, displayType):
+def handleKeyPresses(fromWhere, ammo, currentGun, myProjectiles, rocketAccel, x, y, rocketWidth, difficultySelection, screenSizeSelection, displayType, display_height):
     #HANDLE KEY PRESS/RELEASE/USER ACTIONS
     keys = pygame.key.get_pressed()
     exiting = False
@@ -162,13 +162,15 @@ def handleKeyPresses(fromWhere, ammo, currentGun, myProjectiles, rocketAccel, x,
         if event.type == pygame.QUIT:
             exiting = True
         if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE and fromWhere == "Game":
-            screenSizeSelection, displayType = mainMenu("Pause", screenSizeSelection, difficultySelection, displayType)
+            myMenu = mainMenu("Pause", screenSizeSelection, difficultySelection, displayType)
+            difficultySelection, screenSizeSelection, displayType, exiting = myMenu.displayMenu()
+            del myMenu
             #TO DO: TEST IF RESOLUTION WAS REDUCED BECAUSE PLAYER COULD NOW BE OUTSIDE OF SCREEN BOUNDS
         if event.type == pygame.KEYDOWN and (event.key == pygame.K_KP_ENTER or event.key == pygame.K_RETURN):
             enterPressed = True
         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and ammo >0: #MAKE USER NEED TO PRESS SPACE OVER AND OVER TO FIRE
             ammo = ammo - 1
-            bulletProperties = loadBulletInfoIntomyProjectilesMatrix(currentGun, False, 0, difficultySelection)
+            bulletProperties = loadBulletInfoIntomyProjectilesMatrix(currentGun, False, 0, difficultySelection, display_height)
             myProjectiles.append([bulletProperties[0], x + (rocketWidth/2) - int((bulletProperties[1]/2)) , y , bulletProperties[1], bulletProperties[2], bulletProperties[3], bulletProperties[4], bulletProperties[5], bulletProperties[6], bulletProperties[7], 0])
             #print "Firing! Damage: " + str(myProjectiles[len(myProjectiles)-1][9])
     rocketXDelta = 0
@@ -183,7 +185,7 @@ def handleKeyPresses(fromWhere, ammo, currentGun, myProjectiles, rocketAccel, x,
         rocketYDelta = rocketAccel
     return exiting, ammo, myProjectiles, rocketXDelta, rocketYDelta, enterPressed, screenSizeSelection, displayType
 
-def addGameObjects(enemiesAlive, currentLevel, currentGun, myEnemies, starProbabilitySpace, starDensity, starMoveSpeed, myProjectiles):
+def addGameObjects(enemiesAlive, currentLevel, currentGun, myEnemies, starProbabilitySpace, starDensity, starMoveSpeed, myProjectiles, display_width):
     #ADD ENEMIES
     if enemiesAlive == 0:
         currentLevel = currentLevel + 1
@@ -200,7 +202,7 @@ def addGameObjects(enemiesAlive, currentLevel, currentGun, myEnemies, starProbab
         myProjectiles.append(["Star", rndNumb, 0, 1 , 1 , 255, 255, 255, starMoveSpeed, 0, 0])
     return currentLevel, currentGun, enemiesAlive, myEnemies, myProjectiles
 
-def movePlayer(x, y, rocketWidth, rocketHeight, rocketXDelta, rocketYDelta):
+def movePlayer(x, y, rocketWidth, rocketHeight, rocketXDelta, rocketYDelta, display_width, display_height):
     #TEST FOR PLAYER ATTEMPTING TO TRAVEL BEYOND SCREEN BOUNDS
     if (x + rocketWidth + rocketXDelta > display_width) or (x + rocketXDelta < 0):
         rocketXDelta = 0
@@ -210,7 +212,7 @@ def movePlayer(x, y, rocketWidth, rocketHeight, rocketXDelta, rocketYDelta):
     y = y + rocketYDelta
     return x, y
 
-def moveAndDrawProjectilesAndEnemies(myProjectiles, myEnemies, myHealth, score, enemiesAlive, x, y, rocketWidth, rocketHeight, difficultySelection):
+def moveAndDrawProjectilesAndEnemies(myProjectiles, myEnemies, myHealth, score, enemiesAlive, x, y, rocketWidth, rocketHeight, difficultySelection, display_width, display_height):
     myDeleteList = []
     
     for i in xrange(len(myProjectiles)): #for each bullet and star
@@ -228,7 +230,7 @@ def moveAndDrawProjectilesAndEnemies(myProjectiles, myEnemies, myHealth, score, 
                     if hit == True:
                         y = max(0, y - (display_height/4))
                     else:
-                        myProjectiles[i][10] = enemyMovementAI(myProjectiles[i])
+                        myProjectiles[i][10] = enemyMovementAI(myProjectiles[i], display_width, display_height)
                         myProjectiles[i][1] = myProjectiles[i][1] + myProjectiles[i][10]
         elif str(myProjectiles[i][0])[:4] == "My B": #otherwise if it's actually user's bullet
             if myProjectiles[i][2] + myProjectiles[i][8] - 1 < 0: #if it's going above the top of the screen,
@@ -261,26 +263,25 @@ def moveAndDrawProjectilesAndEnemies(myProjectiles, myEnemies, myHealth, score, 
             myDeleteList.append(i) #flag this enemy for deletion
         else:
             if enemyAttackAI(myEnemies[i][3], difficultySelection) == 1: #decide if enemy will attack
-                bulletProperties = loadBulletInfoIntomyProjectilesMatrix(myEnemies[i][1], True, myEnemies[i][8], difficultySelection) #if the enemy is attacking, then load the bullet in the projectile matrix
+                bulletProperties = loadBulletInfoIntomyProjectilesMatrix(myEnemies[i][1], True, myEnemies[i][8], difficultySelection, display_height) #if the enemy is attacking, then load the bullet in the projectile matrix
                 myProjectiles.append([bulletProperties[0], myEnemies[i][6] + (myEnemies[i][10]/2) - (bulletProperties[1]/2), myEnemies[i][7] , bulletProperties[1], bulletProperties[2], bulletProperties[3], bulletProperties[4], bulletProperties[5], bulletProperties[6], bulletProperties[7], bulletProperties[8]])
             myEnemies[i][6] = myEnemies[i][6] + myEnemies[i][8] #move this enemy
             myEnemies[i][7] = myEnemies[i][7] + myEnemies[i][9]
             drawFromFile(myEnemies[i][5], myEnemies[i][6], myEnemies[i][7])
-            myEnemies[i] = enemyMovementAI(myEnemies[i]) #establish this enemy's next move
+            myEnemies[i] = enemyMovementAI(myEnemies[i], display_width, display_height) #establish this enemy's next move
     #delete enemies that were flagged for completion
     for i in xrange(len(myDeleteList)):
         del myEnemies[myDeleteList[i]-i]
     return myProjectiles, myEnemies, myHealth, score, enemiesAlive, y
 
-def testIfPlayerLost(myHealth, exiting, score):
+def testIfPlayerLost(myHealth, exiting, score, display_width, display_height):
     lost = False
     if myHealth <= 0:
         lost = True
-        exiting = True
-        largeMessageDisplay("YOU LOSE")
+        largeMessageDisplay("YOU LOSE", display_width, display_height)
         gameDisplay.fill(black)
-        largeMessageDisplay(str(score) + " pts")
-    return lost, exiting
+        largeMessageDisplay(str(score) + " pts", display_width, display_height)
+    return lost
 
 def drawFromFile(myFile, x, y):
     if myFile == "Ufo.png":
@@ -293,11 +294,11 @@ def drawFromFile(myFile, x, y):
     objectToDraw = pygame.image.load(myFile)
     drawObject(objectToDraw, x, y)
 
-def drawGameStats(myHealth, ammo, currentLevel, score):
-    smallMessageDisplay("Health: " + str(myHealth), 0)
-    smallMessageDisplay("Ammo: " + str(ammo), 1)
-    smallMessageDisplay("Level: " + str(currentLevel), 2)
-    smallMessageDisplay("Score: " + str(score), 3)
+def drawGameStats(myHealth, ammo, currentLevel, score, display_width):
+    smallMessageDisplay("Health: " + str(myHealth), 0, display_width)
+    smallMessageDisplay("Ammo: " + str(ammo), 1, display_width)
+    smallMessageDisplay("Level: " + str(currentLevel), 2, display_width)
+    smallMessageDisplay("Score: " + str(score), 3, display_width)
 
 def adjustStarMoveSpeed(maximumStarMoveSpeed, numberOfStarSpeeds):
     return ((1/float(numberOfStarSpeeds))*random.randint(1,numberOfStarSpeeds)) * maximumStarMoveSpeed
@@ -346,177 +347,189 @@ def updateHighScores(highScoresArray):
     connection.commit()
     connection.close()
 
-def mainMenu(menuType, screenSizeSelection, difficultySelection, displayType):
-    menuDirectory = "Main"
-    menuJustOpened = True
-    difficultyChoices = ["Easy", "Medium", "Hard", "Expert", "You already lost lol"]
-    score = 0
-    myHealth = 100
-    currentLevel = 0
-    enemiesAlive = 1
-    starDensity = .1 #PROBABILITY A NEW LINE CONTAINS A STAR x100%
-    starProbabilitySpace = 1000 #IF STARDENSITY = .5, THEN 50% PROBABILITY NEW LINE WILL CONTAIN STAR. RAND # GENERATOR WOULD HAVE TO GENERATE 1 THROUGH (.5*1000) FOR .5 PROB TO BE TRUE
-    maximumStarMoveSpeed = 4.1
-    numberOfStarSpeeds = 16
-    starMoveSpeed = maximumStarMoveSpeed
-    exiting = False
-    menuSelectionIndex = 6
-    ammo = 0
-    rocketXDelta = 0
-    rocketYDelta = 0
-    rocketYDeltaWas = 0
-    rocketXDeltaWas = 0
-    rocketWidth = 48
-    rocketHeight = 66
-    myProjectiles = []
-    myEnemies = []
-    currentGun = ""
-    rocketAccel = 25
-    global display_width
-    global display_height
-    global gameDisplay
-    x = (display_width/2)-(rocketWidth/2)
-    y = (display_height-rocketHeight)
-    highScores = loadHighScores()
-    colorIntensity = 255
-    colorIntensityDirection = 5
-    while exiting == False:
-        if colorIntensity + colorIntensityDirection > 255:
-            colorIntensityDirection = -5
-        elif colorIntensity + colorIntensityDirection < 64:
-            colorIntensityDirection = 5
-        colorIntensity = colorIntensity + colorIntensityDirection
-        smallText = pygame.font.Font("freesansbold.ttf", 24)
-        largeText = pygame.font.Font("freesansbold.ttf", 48)
-        textSurf, textRect = textObjects("Spacing Out", largeText, white)
-        textRect.center = ((display_width/2), (25))
-        gameDisplay.blit(textSurf, textRect)
-        if menuType == "Pause":
-            textSurf, textRect = textObjects("-Paused-", smallText, white)
-            textRect.center = ((display_width/2), (75))
-            gameDisplay.blit(textSurf, textRect)
+class mainMenu(object):
+    def __init__(self, menuType, screenSizeSelection, difficultySelection, displayType):
+        self.menuType = menuType
+        self.screenSizeSelection = screenSizeSelection
+        self.difficultySelection = difficultySelection
+        self.displayType = displayType
+        self.menuDirectory = "Main"
+        self.menuJustOpened = True
+        self.difficultyChoices = ["Easy", "Medium", "Hard", "Expert", "You already lost lol"]
+        self.score = 0
+        self.myHealth = 100
+        self.currentLevel = 0
+        self.enemiesAlive = 1
+        self.starDensity = .1 #PROBABILITY A NEW LINE CONTAINS A STAR x100%
+        self.starProbabilitySpace = 1000 #IF STARDENSITY = .5, THEN 50% PROBABILITY NEW LINE WILL CONTAIN STAR. RAND # GENERATOR WOULD HAVE TO GENERATE 1 THROUGH (.5*1000) FOR .5 PROB TO BE TRUE
+        self.maximumStarMoveSpeed = 4.1
+        self.numberOfStarSpeeds = 16
+        self.starMoveSpeed = self.maximumStarMoveSpeed
+        self.exiting = False
+        self.menuSelectionIndex = 6
+        self.ammo = 0
+        self.rocketXDelta = 0
+        self.rocketYDelta = 0
+        self.rocketYDeltaWas = 0
+        self.rocketXDeltaWas = 0
+        self.rocketWidth = 48
+        self.rocketHeight = 66
+        self.myProjectiles = []
+        self.myEnemies = []
+        self.currentGun = ""
+        self.rocketAccel = 25
+        allResolutionsAvail = pygame.display.list_modes()
+        allResolutionsAvail.sort()
+        self.display_width = allResolutionsAvail[screenSizeSelection][0]
+        self.display_height = allResolutionsAvail[screenSizeSelection][1]
+        if displayType == "Full Screen":
+            self.gameDisplay = pygame.display.set_mode((self.display_width, self.display_height), pygame.FULLSCREEN)
+        else:
+            self.gameDisplay = pygame.display.set_mode((self.display_width, self.display_height))
+        self.x = (self.display_width/2)-(self.rocketWidth/2)
+        self.y = (self.display_height-self.rocketHeight)
+        self.highScores = loadHighScores()
+        self.colorIntensity = 255
+        self.colorIntensityDirection = 5
+
+    def displayMenu(self):
+        while self.exiting == False:
+            if self.colorIntensity + self.colorIntensityDirection > 255:
+                self.colorIntensityDirection = -5
+            elif self.colorIntensity + self.colorIntensityDirection < 64:
+                self.colorIntensityDirection = 5
+            self.colorIntensity = self.colorIntensity + self.colorIntensityDirection
+            self.smallText = pygame.font.Font("freesansbold.ttf", 24)
+            self.largeText = pygame.font.Font("freesansbold.ttf", 48)
+            self.textSurf, self.textRect = textObjects("Spacing Out", self.largeText, white)
+            self.textRect.center = ((self.display_width/2), (25))
+            self.gameDisplay.blit(self.textSurf, self.textRect)
+            if self.menuType == "Pause":
+                self.textSurf, self.textRect = textObjects("-Paused-", self.smallText, white)
+                self.textRect.center = ((self.display_width/2), (75))
+                self.gameDisplay.blit(self.textSurf, self.textRect)
+                
+            self.exiting, self.ammo, self.myProjectiles, self.rocketXDelta, self.rocketYDelta, self.enterPressed, self.screenSizeSelection, self.displayType = handleKeyPresses("Main Menu", self.ammo, self.currentGun, self.myProjectiles, self.rocketAccel, self.x, self.y, self.rocketWidth, self.difficultySelection, self.screenSizeSelection, self.displayType, self.display_height)
+            self.currentLevel, self.currentGun, self.enemiesAlive, self.myEnemies, self.myProjectiles = addGameObjects(
+                self.enemiesAlive, self.currentLevel, self.currentGun, self.myEnemies, self.starProbabilitySpace, self.starDensity, self.starMoveSpeed, self.myProjectiles, self.display_width)
+            self.starMoveSpeed = adjustStarMoveSpeed(self.maximumStarMoveSpeed, self.numberOfStarSpeeds)
+            self.myProjectiles, self.myEnemies, self.myHealth, self.score, self.enemiesAlive, self.y = moveAndDrawProjectilesAndEnemies(
+                self.myProjectiles, self.myEnemies, self.myHealth, self.score, self.enemiesAlive, self.x, self.y, self.rocketWidth, self.rocketHeight, self.difficultySelection, self.display_width, self.display_height)
+            drawObject(myCharacter, self.x, self.y)
+            if self.menuDirectory == "Main":
+                for self.i in xrange(7):
+                    self.rgb = (255, 255, 255)
+                    if self.i == self.menuSelectionIndex:
+                        self.rgb = (self.colorIntensity, 0, 0)
+                    if self.i == 6:
+                        if self.menuType == "Pause":
+                            self.text = "Resume"
+                        else:
+                            self.text = "Play"
+                    if self.i == 5:
+                        self.text = "Difficulty: " + self.difficultyChoices[self.difficultySelection]
+                        if self.menuType == "Pause":
+                            self.tempRGB = (self.rgb[0]*.25, self.rgb[1]*.25, self.rgb[2]*.25)
+                            self.rgb = self.tempRGB
+                    if self.i == 4:
+                        self.text = "High Scores"
+                    if self.i == 3:
+                        self.text = "How To Play"
+                    if self.i == 2:
+                        self.text = "Settings"
+                    if self.i == 1:
+                        self.text = "Credits"
+                    if self.i == 0:
+                        self.text = "Quit"
+                    self.textSurf, self.textRect = textObjects(self.text, self.smallText, self.rgb)
+                    self.textRect.center = ((self.display_width/2), (self.display_height/2 - self.i*(self.rocketAccel)))
+                    self.gameDisplay.blit(self.textSurf, self.textRect)
+                if self.menuJustOpened == False:
+                    if self.rocketYDelta == self.rocketAccel and self.rocketYDeltaWas == 0 and self.menuSelectionIndex >0:
+                        self.menuSelectionIndex = self.menuSelectionIndex - 1
+                        if self.menuSelectionIndex == 5 and self.menuType == "Pause":
+                            self.menuSelectionIndex = self.menuSelectionIndex - 1
+                    if self.rocketYDelta == -self.rocketAccel and self.rocketYDeltaWas == 0 and self.menuSelectionIndex < 6:
+                        self.menuSelectionIndex = self.menuSelectionIndex + 1
+                        if self.menuSelectionIndex == 5 and self.menuType == "Pause":
+                            self.menuSelectionIndex = self.menuSelectionIndex + 1    
+                    if ((self.rocketXDelta == self.rocketAccel and self.rocketXDeltaWas == 0) or (self.enterPressed == True)) and self.menuSelectionIndex == 5:
+                        self.difficultySelection = (self.difficultySelection + 1) %len(self.difficultyChoices)
+                    if (self.rocketXDelta == -self.rocketAccel and self.rocketXDeltaWas == 0) and self.menuSelectionIndex == 5:
+                        self.difficultySelection = (self.difficultySelection - 1) %len(self.difficultyChoices)
+                    if self.enterPressed == True and self.menuSelectionIndex == 2:
+                        self.menuDirectory = "Settings"
+                        self.menuSelectionIndex = 4
+                    if self.enterPressed == True and self.menuSelectionIndex == 6:
+                        return self.difficultySelection, self.screenSizeSelection, self.displayType, self.exiting
+                    if self.enterPressed == True and self.menuSelectionIndex == 0:
+                        self.exiting = True
+                self.menuJustOpened = False
+            elif self.menuDirectory == "Settings":
+                self.fullScreenWindowChanged = False
+                self.screenSizeChoices = pygame.display.list_modes()
+                self.screenSizeChoices.sort()
+                for self.i in xrange(5):
+                    if self.i == 4:
+                        self.text = "Screen Size: " + str(self.screenSizeChoices[self.screenSizeSelection][0]) + "x" + str(self.screenSizeChoices[self.screenSizeSelection][1])
+                    if self.i == 3:
+                        self.text = "Screen: " + self.displayType
+                    if self.i == 2:
+                        self.text = "Music Volume: 100"
+                    if self.i == 1:
+                        self.text = "SFX Volume: 100"
+                    if self.i == 0:
+                        self.text = "Go Back"
+                    if self.i == self.menuSelectionIndex:
+                        self.rgb = (self.colorIntensity, 0, 0)
+                    else:
+                        self.rgb = (255, 255, 255)
+                    self.textSurf, self.textRect = textObjects(self.text, self.smallText, self.rgb)
+                    self.textRect.center = ((self.display_width/2), (self.display_height/2 - self.i*(self.rocketAccel)))
+                    self.gameDisplay.blit(self.textSurf, self.textRect)
             
-        exiting, ammo, myProjectiles, rocketXDelta, rocketYDelta, enterPressed, screenSizeSelection, displayType = handleKeyPresses("Main Menu", ammo, currentGun, myProjectiles, rocketAccel, x, y, rocketWidth, difficultySelection, screenSizeSelection, displayType)
-        currentLevel, currentGun, enemiesAlive, myEnemies, myProjectiles = addGameObjects(
-            enemiesAlive, currentLevel, currentGun, myEnemies, starProbabilitySpace, starDensity, starMoveSpeed, myProjectiles)
-        starMoveSpeed = adjustStarMoveSpeed(maximumStarMoveSpeed, numberOfStarSpeeds)
-        myProjectiles, myEnemies, myHealth, score, enemiesAlive, y = moveAndDrawProjectilesAndEnemies(
-            myProjectiles, myEnemies, myHealth, score, enemiesAlive, x, y, rocketWidth, rocketHeight, difficultySelection)
-        drawObject(myCharacter, x, y)
-        if menuDirectory == "Main":
-            for i in xrange(7):
-                rgb = (255, 255, 255)
-                if i == menuSelectionIndex:
-                    rgb = (colorIntensity, 0, 0)
-                if i == 6:
-                    if menuType == "Pause":
-                        text = "Resume"
+                if self.rocketYDelta == self.rocketAccel and self.rocketYDeltaWas == 0 and self.menuSelectionIndex >0:
+                    self.menuSelectionIndex = self.menuSelectionIndex - 1
+                if self.rocketYDelta == -self.rocketAccel and self.rocketYDeltaWas == 0 and self.menuSelectionIndex < 4:
+                    self.menuSelectionIndex = self.menuSelectionIndex + 1
+                if ((self.rocketXDelta == self.rocketAccel and self.rocketXDeltaWas == 0) or (self.enterPressed == True)) and self.menuSelectionIndex == 4:
+                    self.screenSizeSelection = (self.screenSizeSelection + 1) %len(self.screenSizeChoices)
+                if (self.rocketXDelta == -self.rocketAccel and self.rocketXDeltaWas == 0) and self.menuSelectionIndex == 4:
+                    self.screenSizeSelection = (self.screenSizeSelection - 1) %len(self.screenSizeChoices)
+                if (self.enterPressed == True or (abs(self.rocketXDelta) == self.rocketAccel and self.rocketXDeltaWas == 0))and self.menuSelectionIndex == 3:
+                    if self.displayType == "Window":
+                        self.displayType = "Full Screen"
                     else:
-                        text = "Play"
-                if i == 5:
-                    text = "Difficulty: " + difficultyChoices[difficultySelection]
-                    if menuType == "Pause":
-                        tempRGB = (rgb[0]*.25, rgb[1]*.25, rgb[2]*.25)
-                        rgb = tempRGB
-                if i == 4:
-                    text = "High Scores"
-                if i == 3:
-                    text = "How To Play"
-                if i == 2:
-                    text = "Settings"
-                if i == 1:
-                    text = "Credits"
-                if i == 0:
-                    text = "Quit"
-                textSurf, textRect = textObjects(text, smallText, rgb)
-                textRect.center = ((display_width/2), (display_height/2 - i*(rocketAccel)))
-                gameDisplay.blit(textSurf, textRect)
-            if menuJustOpened == False:
-                if rocketYDelta == rocketAccel and rocketYDeltaWas == 0 and menuSelectionIndex >0:
-                    menuSelectionIndex = menuSelectionIndex - 1
-                    if menuSelectionIndex == 5 and menuType == "Pause":
-                        menuSelectionIndex = menuSelectionIndex - 1
-                if rocketYDelta == -rocketAccel and rocketYDeltaWas == 0 and menuSelectionIndex < 6:
-                    menuSelectionIndex = menuSelectionIndex + 1
-                    if menuSelectionIndex == 5 and menuType == "Pause":
-                        menuSelectionIndex = menuSelectionIndex + 1                
-                if ((rocketXDelta == rocketAccel and rocketXDeltaWas == 0) or (enterPressed == True)) and menuSelectionIndex == 5:
-                    difficultySelection = (difficultySelection + 1) %len(difficultyChoices)
-                if (rocketXDelta == -rocketAccel and rocketXDeltaWas == 0) and menuSelectionIndex == 5:
-                    difficultySelection = (difficultySelection - 1) %len(difficultyChoices)
-                if enterPressed == True and menuSelectionIndex == 2:
-                    menuDirectory = "Settings"
-                    menuSelectionIndex = 4
-                if enterPressed == True and menuSelectionIndex == 6:
-                    if menuType == "Pause":
-                        return screenSizeSelection, displayType
+                        self.displayType = "Window"
+                    self.fullScreenWindowChanged = True
+                if ((((self.rocketXDelta == self.rocketAccel and self.rocketXDeltaWas == 0) or (self.enterPressed == True)) and self.menuSelectionIndex == 4) or ((self.rocketXDelta == -self.rocketAccel and self.rocketXDeltaWas == 0) and self.menuSelectionIndex == 4)) or self.fullScreenWindowChanged == True:
+                    self.display_width = self.screenSizeChoices[self.screenSizeSelection][0]
+                    self.display_height = self.screenSizeChoices[self.screenSizeSelection][1]
+                    if self.displayType == "Window":
+                        self.gameDisplay = pygame.display.set_mode((self.display_width, self.display_height))
                     else:
-                        gameLoop(difficultySelection, screenSizeSelection, displayType)
-                if enterPressed == True and menuSelectionIndex == 0:
-                    exiting = True
-            menuJustOpened = False
-        elif menuDirectory == "Settings":
-            fullScreenWindowChanged = False
-            screenSizeChoices = pygame.display.list_modes()
-            screenSizeChoices.sort()
-            for i in xrange(5):
-                if i == 4:
-                    text = "Screen Size: " + str(screenSizeChoices[screenSizeSelection][0]) + "x" + str(screenSizeChoices[screenSizeSelection][1])
-                if i == 3:
-                    text = "Screen: " + displayType
-                if i == 2:
-                    text = "Music Volume: 100"
-                if i == 1:
-                    text = "SFX Volume: 100"
-                if i == 0:
-                    text = "Go Back"
-                if i == menuSelectionIndex:
-                    rgb = (colorIntensity, 0, 0)
-                else:
-                    rgb = (255, 255, 255)
-                textSurf, textRect = textObjects(text, smallText, rgb)
-                textRect.center = ((display_width/2), (display_height/2 - i*(rocketAccel)))
-                gameDisplay.blit(textSurf, textRect)
-        
-            if rocketYDelta == rocketAccel and rocketYDeltaWas == 0 and menuSelectionIndex >0:
-                menuSelectionIndex = menuSelectionIndex - 1
-            if rocketYDelta == -rocketAccel and rocketYDeltaWas == 0 and menuSelectionIndex < 4:
-                menuSelectionIndex = menuSelectionIndex + 1
-            if ((rocketXDelta == rocketAccel and rocketXDeltaWas == 0) or (enterPressed == True)) and menuSelectionIndex == 4:
-                screenSizeSelection = (screenSizeSelection + 1) %len(screenSizeChoices)
-            if (rocketXDelta == -rocketAccel and rocketXDeltaWas == 0) and menuSelectionIndex == 4:
-                screenSizeSelection = (screenSizeSelection - 1) %len(screenSizeChoices)
-            if (enterPressed == True or (abs(rocketXDelta) == rocketAccel and rocketXDeltaWas == 0))and menuSelectionIndex == 3:
-                if displayType == "Window":
-                    displayType = "Full Screen"
-                else:
-                    displayType = "Window"
-                fullScreenWindowChanged = True
-            if ((((rocketXDelta == rocketAccel and rocketXDeltaWas == 0) or (enterPressed == True)) and menuSelectionIndex == 4) or ((rocketXDelta == -rocketAccel and rocketXDeltaWas == 0) and menuSelectionIndex == 4)) or fullScreenWindowChanged == True:
-                display_width = screenSizeChoices[screenSizeSelection][0]
-                display_height = screenSizeChoices[screenSizeSelection][1] - 25
-                if displayType == "Window":
-                    gameDisplay = pygame.display.set_mode((display_width, display_height))
-                else:
-                    gameDisplay = pygame.display.set_mode((display_width, display_height), pygame.FULLSCREEN)
-                myProjectiles = []
-                x = (display_width/2)-(rocketWidth/2)
-                y = (display_height-rocketHeight)
-                fullScreenWindowChanged = False
-            if enterPressed == True and menuSelectionIndex == 6:
-                gameLoop(difficultySelection, screenSizeSelection, displayType)
-            if enterPressed == True and menuSelectionIndex == 0:
-                menuDirectory = "Main"
-                menuSelectionIndex = 2
-        rocketYDeltaWas = rocketYDelta
-        rocketXDeltaWas = rocketXDelta
-        updateScreenAndLimitFPS(60)
-        gameDisplay.fill(black)
-    pygame.quit()
-    quit()
+                        self.gameDisplay = pygame.display.set_mode((self.display_width, self.display_height), pygame.FULLSCREEN)
+                    self.myProjectiles = []
+                    self.x = (self.display_width/2)-(self.rocketWidth/2)
+                    self.y = (self.display_height-self.rocketHeight)
+                    self.fullScreenWindowChanged = False
+                if self.enterPressed == True and self.menuSelectionIndex == 6:
+                    gameLoop(self.difficultySelection, self.screenSizeSelection, self.displayType)
+                if self.enterPressed == True and self.menuSelectionIndex == 0:
+                    self.menuDirectory = "Main"
+                    self.menuSelectionIndex = 2
+            self.rocketYDeltaWas = self.rocketYDelta
+            self.rocketXDeltaWas = self.rocketXDelta
+            updateScreenAndLimitFPS(60)
+            self.gameDisplay.fill(black)
+        return self.difficultySelection, self.screenSizeSelection, self.displayType, self.exiting
    
 def gameLoop(difficultySelection, screenSizeSelection, displayType):
     # INITIALIZATION
+    allResolutionsAvail = pygame.display.list_modes()
+    allResolutionsAvail.sort()
+    display_width = allResolutionsAvail[screenSizeSelection][0]
+    display_height = allResolutionsAvail[screenSizeSelection][1]
     exiting = False
     lost = False
     rocketWidth = 48
@@ -538,48 +551,63 @@ def gameLoop(difficultySelection, screenSizeSelection, displayType):
     starDensity = .1 #PROBABILITY A NEW LINE CONTAINS A STAR x100%
     starProbabilitySpace = 1000 #IF STARDENSITY = .5, THEN 50% PROBABILITY NEW LINE WILL CONTAIN STAR. RAND # GENERATOR WOULD HAVE TO GENERATE 1 THROUGH (.5*1000) FOR .5 PROB TO BE TRUE
     score = 0
-    x = (display_width/2)-(rocketWidth/2)
-    y = (display_height-rocketHeight)
-        
+    x = (allResolutionsAvail[screenSizeSelection][0]/2)-(rocketWidth/2)
+    y = (allResolutionsAvail[screenSizeSelection][1]-rocketHeight)
     # GAME LOOP
-    while not exiting:
+    while not exiting and lost == False:
         
         #TEST FOR CONDITIONS THAT PREVENT FUTURE USER ACTIONS
 
         #TEST FOR CONDITIONS THAT ALLOW FUTURE USER ACTIONS
 
         currentLevel, currentGun, enemiesAlive, myEnemies, myProjectiles = addGameObjects(
-            enemiesAlive, currentLevel, currentGun, myEnemies, starProbabilitySpace, starDensity, starMoveSpeed, myProjectiles)
+            enemiesAlive, currentLevel, currentGun, myEnemies, starProbabilitySpace, starDensity, starMoveSpeed, myProjectiles, allResolutionsAvail[screenSizeSelection][0])
         exiting, ammo, myProjectiles, rocketXDelta, rocketYDelta, enterPressed, screenSizeSelection, displayType = handleKeyPresses(
-            "Game", ammo, currentGun, myProjectiles, rocketAccel, x, y, rocketWidth, difficultySelection, screenSizeSelection, displayType) 
-        x, y = movePlayer(x, y, rocketWidth, rocketHeight, rocketXDelta, rocketYDelta)
+            "Game", ammo, currentGun, myProjectiles, rocketAccel, x, y, rocketWidth, difficultySelection, screenSizeSelection, displayType, allResolutionsAvail[screenSizeSelection][1]) 
+        x, y = movePlayer(x, y, rocketWidth, rocketHeight, rocketXDelta, rocketYDelta, allResolutionsAvail[screenSizeSelection][0], allResolutionsAvail[screenSizeSelection][1])
         gameDisplay.fill(black)
         myProjectiles, myEnemies, myHealth, score, enemiesAlive, y = moveAndDrawProjectilesAndEnemies(
-            myProjectiles, myEnemies, myHealth, score, enemiesAlive, x, y, rocketWidth, rocketHeight, difficultySelection)
-        lost, exiting = testIfPlayerLost(myHealth, exiting, score)
+            myProjectiles, myEnemies, myHealth, score, enemiesAlive, x, y, rocketWidth, rocketHeight, difficultySelection, allResolutionsAvail[screenSizeSelection][0], allResolutionsAvail[screenSizeSelection][1])
+        lost = testIfPlayerLost(myHealth, exiting, score, allResolutionsAvail[screenSizeSelection][0], allResolutionsAvail[screenSizeSelection][1])
         drawObject(myCharacter, x, y)
-        drawGameStats(myHealth, ammo, currentLevel, score)
+        drawGameStats(myHealth, ammo, currentLevel, score, allResolutionsAvail[screenSizeSelection][0])
         starMoveSpeed = adjustStarMoveSpeed(maximumStarMoveSpeed, numberOfStarSpeeds)
         updateScreenAndLimitFPS(60)
         
     #OUT OF THE GAME LOOP
     if lost == True:
-        mainMenu("New Game", screenSizeSelection, difficultySelection, displayType)
-    pygame.quit()
-    quit()
+        return  difficultySelection, screenSizeSelection, displayType, exiting
+    return difficultySelection, screenSizeSelection, displayType, exiting
 
 pygame.init()
 black = (0,0,0)
 white = (255,255,255)
 red = (255,0,0)
 clock = pygame.time.Clock()
-display_width = pygame.display.list_modes()[(int(len(pygame.display.list_modes())/2.0))][0]
-display_height = pygame.display.list_modes()[(int(len(pygame.display.list_modes())/2.0))][1] - 25
+allResolutionsAvail = pygame.display.list_modes()
+allResolutionsAvail.sort()
+display_width = allResolutionsAvail[(int(len(allResolutionsAvail)/2.0))][0]
+display_height = allResolutionsAvail[(int(len(allResolutionsAvail)/2.0))][1]
 myCharacter = pygame.image.load("Rocket.png")
 UFO = pygame.image.load("Ufo.png")
 BlueBomber = pygame.image.load("Blue Bomber.png")
 HJet = pygame.image.load("H Jet.png")
 gameDisplay = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption('Spacing Out')
-mainMenu("New Game", int(len(pygame.display.list_modes())/2.0), 0, "Window")
-gameLoop()
+
+#myMenu = mainMenu("New Game", int(len(pygame.display.list_modes())/2.0), 0, "Window")
+menuType = "New Game"
+screenSizeSelection = int(len(allResolutionsAvail)/2.0)
+difficultySelection = 0
+displayType = "Window"
+exiting = False
+
+while exiting == False:
+    myMenu = mainMenu(menuType, screenSizeSelection, difficultySelection, displayType)
+    difficultySelection, screenSizeSelection, displayType, exiting = myMenu.displayMenu()
+    del myMenu
+    if exiting == False:
+        difficultySelection, screenSizeSelection, displayType, exiting = gameLoop(difficultySelection, screenSizeSelection, displayType)
+
+pygame.quit()
+quit()
