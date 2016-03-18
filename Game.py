@@ -4,6 +4,7 @@ import random
 import sys,os
 import math
 import sqlite3
+from operator import itemgetter
 
 class gameEventHandler(object):
     def textObjects(self, text, font, color):
@@ -13,16 +14,20 @@ class gameEventHandler(object):
         self.textSurface = font.render(self.text, True, self.color)
         return self.textSurface, self.textSurface.get_rect()
 
-    def largeMessageDisplay(self, text, displayWidth, displayHeight):
+    def largeMessageDisplay(self, text, displayWidth, displayHeight, fontSize, verticalPosition = .5, waitTwoSeconds = True):
         self.text = text
         self.displayWidth = displayWidth
         self.displayHeight = displayHeight
-        self.largeText = pygame.font.Font("freesansbold.ttf", 135)
+        self.verticalPosition = verticalPosition
+        self.waitTwoSeconds = waitTwoSeconds
+        self.textPosition = (self.verticalPosition * self.displayHeight)
+        self.largeText = pygame.font.Font("freesansbold.ttf", fontSize) #135
         self.textSurf, self.textRect = self.textObjects(self.text, self.largeText, white)
-        self.textRect.center = ((self.displayWidth/2.0), (self.displayHeight/2.0))
+        self.textRect.center = ((self.displayWidth/2.0), self.textPosition)
         gameDisplay.blit(self.textSurf, self.textRect)
         pygame.display.update()
-        time.sleep(2)
+        if self.waitTwoSeconds == True:
+            time.sleep(2)
 
     def smallMessageDisplay(self, text, lineNumber, displayWidth):
         self.text = text
@@ -32,7 +37,81 @@ class gameEventHandler(object):
         self.textSurf, self.textRect = self.textObjects(self.text, self.smallText, white)
         self.textRect.center = ((self.displayWidth-60), 15 + (15*self.lineNumber))
         gameDisplay.blit(self.textSurf, self.textRect)
+
+    def textInput(self, questionString, displayWidth, displayHeight):
+        self.displayWidth = displayWidth
+        self.displayHeight = displayHeight
+        self.questionString = questionString
+        self.inputString = ""
+        while 1 == 1:
+            for self.event in pygame.event.get():
+                gameDisplay.fill(black)
+                self.largeMessageDisplay(self.questionString, self.displayWidth, self.displayHeight, 64, .25, False)
+                self.largeMessageDisplay(self.inputString + "_", self.displayWidth, self.displayHeight, 64, .75, False)
         
+                if self.event.type == pygame.QUIT:
+                    pass
+                    #self.exiting = True
+                if self.event.type == pygame.KEYDOWN and (self.event.key == pygame.K_BACKSPACE or self.event.key == pygame.K_DELETE):
+                    self.inputString = self.inputString[:len(self.inputString) - 1]
+                if self.event.type == pygame.KEYDOWN and (self.event.key == pygame.K_KP_ENTER or self.event.key == pygame.K_RETURN):
+                    return self.inputString
+                if len(self.inputString) < 17:
+                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_a:
+                        self.inputString = self.inputString + "A"
+                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_b:
+                        self.inputString = self.inputString + "B"
+                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_c:
+                        self.inputString = self.inputString + "C"
+                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_d:
+                        self.inputString = self.inputString + "D"
+                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_e:
+                        self.inputString = self.inputString + "E"
+                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_f:
+                        self.inputString = self.inputString + "F"
+                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_g:
+                        self.inputString = self.inputString + "G"
+                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_h:
+                        self.inputString = self.inputString + "H"
+                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_i:
+                        self.inputString = self.inputString + "I"
+                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_j:
+                        self.inputString = self.inputString + "J"
+                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_k:
+                        self.inputString = self.inputString + "K"
+                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_l:
+                        self.inputString = self.inputString + "L"
+                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_m:
+                        self.inputString = self.inputString + "M"
+                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_n:
+                        self.inputString = self.inputString + "N"
+                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_o:
+                        self.inputString = self.inputString + "O"
+                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_p:
+                        self.inputString = self.inputString + "P"
+                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_q:
+                        self.inputString = self.inputString + "Q"
+                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_r:
+                        self.inputString = self.inputString + "R"
+                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_s:
+                        self.inputString = self.inputString + "S"
+                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_t:
+                        self.inputString = self.inputString + "T"
+                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_u:
+                        self.inputString = self.inputString + "U"
+                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_v:
+                        self.inputString = self.inputString + "V"
+                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_w:
+                        self.inputString = self.inputString + "W"
+                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_x:
+                        self.inputString = self.inputString + "X"
+                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_y:
+                        self.inputString = self.inputString + "Y"
+                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_z:
+                        self.inputString = self.inputString + "Z"
+                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_SPACE:
+                        self.inputString = self.inputString + " "
+
     def drawObject(self, myObject, drawX, drawY):
         self.myObject = myObject
         gameDisplay.blit(self.myObject,(drawX, drawY))
@@ -62,6 +141,21 @@ class gameEventHandler(object):
         self.FPSLimit = FPSLimit
         pygame.display.update()
         clock.tick(self.FPSLimit)
+
+    def newHighScore(self, displayWidth, displayHeight):
+        self.dislpayWidth = displayWidth
+        self.displayHeight = displayHeight
+        gameDisplay.fill(black)
+        self.largeMessageDisplay("New High Score!", self.dislpayWidth, self.displayHeight, 64)
+        gameDisplay.fill(black)
+        self.highScoreName = self.textInput("Enter Your Name", self.dislpayWidth, self.displayHeight)
+        gameDisplay.fill(black)
+        self.highScoreState = self.textInput("Enter Your State", self.dislpayWidth, self.displayHeight)
+        gameDisplay.fill(black)
+        self.highScoreCountry = self.textInput("Enter Your Country", self.dislpayWidth, self.displayHeight)
+        gameDisplay.fill(black)
+        return self.highScoreName, self.highScoreState, self.highScoreCountry
+
 
     def loadBulletInfoIntomyProjectilesMatrix(self, gunType, belongsToEnemy, dx, difficultySelection, displayHeight):
         self.gunType = gunType
@@ -327,9 +421,9 @@ class gameEventHandler(object):
         self.lost = False
         if self.myHealth <= 0:
             self.lost = True
-            self.largeMessageDisplay("YOU LOSE", self.displayWidth, self.displayHeight)
+            self.largeMessageDisplay("YOU LOSE", self.displayWidth, self.displayHeight, 135)
             gameDisplay.fill(black)
-            self.largeMessageDisplay(str(self.score) + " pts", self.displayWidth, self.displayHeight)
+            self.largeMessageDisplay(str(self.score) + " pts", self.displayWidth, self.displayHeight, 135)
         return self.lost
 
     def adjustStarMoveSpeed(self, maximumStarMoveSpeed, numberOfStarSpeeds):
@@ -411,7 +505,6 @@ class highScoresDatabase(object):
                 self.a.remove([])
                 #self.a = self.fillInBlankHighScores(self.a)
                 self.highScoresArray.insert(self.i, self.a)
-            print self.highScoresArray
         except:
             self.connection = sqlite3.connect("High_Scores.db")
             self.c = self.connection.cursor()
@@ -440,21 +533,29 @@ class highScoresDatabase(object):
         self.difficulty = difficulty
         self.connection = sqlite3.connect("High_Scores.db")
         self.c = self.connection.cursor()
-        self.c.execute("DROP TABLE IF EXISTS HighScoreTable")
-        self.c.execute("CREATE TABLE HighScoreTable(scoreRecordPK INT, Name TEXT, Score INT, State TEXT, Country TEXT)")
         self.i = -1
         for self.row in self.workingArray:
             self.i = self.i + 1
             if self.difficulty == 0:
-                self.c.execute("INSERT INTO easyHighScoreTable Values(?, ?, ?, ?, ?)", tuple((workingArray[self.i][0], self.workingArray[self.i][1], self.workingArray[self.i][2], self.workingArray[self.i][3], self.workingArray[self.i][4])))
+                self.c.execute("DROP TABLE IF EXISTS easyHighScoreTable")
+                self.c.execute("CREATE TABLE easyHighScoreTable(scoreRecordPK INT, Name TEXT, Score INT, State TEXT, Country TEXT)")
+                self.c.execute("INSERT INTO easyHighScoreTable Values(?, ?, ?, ?, ?)", tuple((int(workingArray[self.i][0]), self.workingArray[self.i][1], int(self.workingArray[self.i][2]), self.workingArray[self.i][3], self.workingArray[self.i][4])))
             if self.difficulty == 1:
-                self.c.execute("INSERT INTO mediumHighScoreTable Values(?, ?, ?, ?, ?)", tuple((workingArray[self.i][0], self.workingArray[self.i][1], self.workingArray[self.i][2], self.workingArray[self.i][3], self.workingArray[self.i][4])))
+                self.c.execute("DROP TABLE IF EXISTS mediumHighScoreTable")
+                self.c.execute("CREATE TABLE mediumHighScoreTable(scoreRecordPK INT, Name TEXT, Score INT, State TEXT, Country TEXT)")
+                self.c.execute("INSERT INTO mediumHighScoreTable Values(?, ?, ?, ?, ?)", tuple((int(workingArray[self.i][0]), self.workingArray[self.i][1], int(self.workingArray[self.i][2]), self.workingArray[self.i][3], self.workingArray[self.i][4])))
             if self.difficulty == 2:
-                self.c.execute("INSERT INTO hardHighScoreTable Values(?, ?, ?, ?, ?)", tuple((workingArray[self.i][0], self.workingArray[self.i][1], self.workingArray[self.i][2], self.workingArray[self.i][3], self.workingArray[self.i][4])))
+                self.c.execute("DROP TABLE IF EXISTS hardHighScoreTable")
+                self.c.execute("CREATE TABLE hardHighScoreTable(scoreRecordPK INT, Name TEXT, Score INT, State TEXT, Country TEXT)")
+                self.c.execute("INSERT INTO hardHighScoreTable Values(?, ?, ?, ?, ?)", tuple((int(workingArray[self.i][0]), self.workingArray[self.i][1], int(self.workingArray[self.i][2]), self.workingArray[self.i][3], self.workingArray[self.i][4])))
             if self.difficulty == 3:
-                self.c.execute("INSERT INTO expertHighScoreTable Values(?, ?, ?, ?, ?)", tuple((workingArray[self.i][0], self.workingArray[self.i][1], self.workingArray[self.i][2], self.workingArray[self.i][3], self.workingArray[self.i][4])))
+                self.c.execute("DROP TABLE IF EXISTS expertHighScoreTable")
+                self.c.execute("CREATE TABLE expertHighScoreTable(scoreRecordPK INT, Name TEXT, Score INT, State TEXT, Country TEXT)")
+                self.c.execute("INSERT INTO expertHighScoreTable Values(?, ?, ?, ?, ?)", tuple((int(workingArray[self.i][0]), self.workingArray[self.i][1], int(self.workingArray[self.i][2]), self.workingArray[self.i][3], self.workingArray[self.i][4])))
             if self.difficulty == 4:
-                self.c.execute("INSERT INTO lolHighScoreTable Values(?, ?, ?, ?, ?)", tuple((workingArray[self.i][0], self.workingArray[self.i][1], self.workingArray[self.i][2], self.workingArray[self.i][3], self.workingArray[self.i][4])))
+                self.c.execute("DROP TABLE IF EXISTS lolHighScoreTable")
+                self.c.execute("CREATE TABLE lolHighScoreTable(scoreRecordPK INT, Name TEXT, Score INT, State TEXT, Country TEXT)")
+                self.c.execute("INSERT INTO lolHighScoreTable Values(?, ?, ?, ?, ?)", tuple((int(workingArray[self.i][0]), self.workingArray[self.i][1], int(self.workingArray[self.i][2]), self.workingArray[self.i][3], self.workingArray[self.i][4])))
         self.connection.commit()
         self.connection.close()
 
@@ -627,11 +728,11 @@ class menuScreen(object):
         for self.i in xrange(3):
             self.rgb = (255, 255, 255)
             if self.i == 2:
-                self.text = "Programming by Michael Finnegan"
+                self.text = "Programming by Mike Finnegan"
             if self.i == 1:
-                self.text = "Art by Michael Finnegan"
+                self.text = "Art by Mike Finnegan"
             if self.i == 0:
-                self.text = "Music/SFX by Michael Finnegan"
+                self.text = "Music/SFX by Mike Finnegan"
             self.textSurf, self.textRect = self.menuGameEventHandler.textObjects(self.text, self.smallText, self.rgb)
             #self.textRect.center = ((self.displayWidth/2), (self.displayHeight/2 - self.i*(self.rocketAccel)))
             self.textRect.center = ((self.displayWidth/2.0), (self.i * 25 + self.screenMoveCounter - self.displayHeight/2.0))
@@ -656,16 +757,20 @@ class menuScreen(object):
             gameDisplay.blit(self.textSurf, self.textRect)
 
     def displayHighScoresMenu(self):
+        if self.menuSelectionIndex == 0:
+            self.rgb = (self.colorIntensity, 0, 0)
+        else:
+            self.rgb = (255, 255, 255)
         if self.highScoreDifficulty == 0:
-            self.textSurf, self.textRect = self.menuGameEventHandler.textObjects("<<  Easy High Scores  >>", self.smallText, white)
+            self.textSurf, self.textRect = self.menuGameEventHandler.textObjects("<<  Easy High Scores  >>", self.smallText, self.rgb)
         if self.highScoreDifficulty == 1:
-            self.textSurf, self.textRect = self.menuGameEventHandler.textObjects("<<  Medium High Scores  >>", self.smallText, white)
+            self.textSurf, self.textRect = self.menuGameEventHandler.textObjects("<<  Medium High Scores  >>", self.smallText, self.rgb)
         if self.highScoreDifficulty == 2:
-            self.textSurf, self.textRect = self.menuGameEventHandler.textObjects("<<  Hard High Scores  >>", self.smallText, white)
+            self.textSurf, self.textRect = self.menuGameEventHandler.textObjects("<<  Hard High Scores  >>", self.smallText, self.rgb)
         if self.highScoreDifficulty == 3:
-            self.textSurf, self.textRect = self.menuGameEventHandler.textObjects("<<  Expert High Scores  >>", self.smallText, white)
+            self.textSurf, self.textRect = self.menuGameEventHandler.textObjects("<<  Expert High Scores  >>", self.smallText, self.rgb)
         if self.highScoreDifficulty == 4:
-            self.textSurf, self.textRect = self.menuGameEventHandler.textObjects("<<  You already lost lol High Scores  >>", self.smallText, white)
+            self.textSurf, self.textRect = self.menuGameEventHandler.textObjects("<<  You already lost lol High Scores  >>", self.smallText, self.rgb)
         self.textRect.center = ((self.displayWidth/2.0), (self.screenMoveCounter + 75))
         gameDisplay.blit(self.textSurf, self.textRect)
         for self.i in xrange(-1, 11):
@@ -687,7 +792,10 @@ class menuScreen(object):
                     self.textRect.center = ((self.displayWidth*((self.j+1)/6.0)), (self.i * 25 + self.displayHeight/2.0))
                     gameDisplay.blit(self.textSurf, self.textRect)
                 elif self.i == 10:
-                    self.rgb = (self.colorIntensity, 0, 0)
+                    if self.menuSelectionIndex == 1:
+                        self.rgb = (self.colorIntensity, 0, 0)
+                    else:
+                        self.rgb = (255, 255, 255)
                     self.text = "Go Back"
                     self.textSurf, self.textRect = self.menuGameEventHandler.textObjects(self.text, self.smallText, self.rgb)
                     self.textRect.center = ((self.displayWidth*.8), (self.displayHeight * .95))
@@ -717,15 +825,17 @@ class menuScreen(object):
             self.menuDirectory = "Credits"
         if self.enterPressed == True and self.menuSelectionIndex == 3:
             self.menuDirectory = "How To Play"
+        if self.enterPressed == True and self.menuSelectionIndex == 6:
+            self.startPlay = True
+            del self.myHighScoreDatabase
+        if self.enterPressed == True and self.menuSelectionIndex == 0:
+            self.exiting = True
         if self.enterPressed == True and self.menuSelectionIndex == 4:
             self.menuDirectory = "High Scores"
+            self.menuSelectionIndex = 0
         if self.enterPressed == True and self.menuSelectionIndex == 2:
             self.menuDirectory = "Settings"
             self.menuSelectionIndex = 4
-        if self.enterPressed == True and self.menuSelectionIndex == 6:
-            self.startPlay = True
-        if self.enterPressed == True and self.menuSelectionIndex == 0:
-            self.exiting = True
 
     def handleUserInputSettingsMenu(self):
         if self.rocketYDelta == self.rocketAccel and self.rocketYDeltaWas == 0 and self.menuSelectionIndex >0:
@@ -768,13 +878,18 @@ class menuScreen(object):
             self.menuDirectory = "Main"
 
     def handleUserInputHighScoresMenu(self):
-        if (self.rocketXDelta == self.rocketAccel and self.rocketXDeltaWas == 0):
+        if (self.rocketYDelta == self.rocketAccel and self.rocketYDeltaWas == 0):
+            self.menuSelectionIndex = (self.menuSelectionIndex + 1) % 2
+        if (self.rocketYDelta == -self.rocketAccel and self.rocketYDeltaWas == 0):
+            self.menuSelectionIndex = (self.menuSelectionIndex - 1) % 2
+        if (self.menuSelectionIndex == 0 and self.rocketXDelta == self.rocketAccel and self.rocketXDeltaWas == 0):
             self.highScoreDifficulty = (self.highScoreDifficulty + 1) % 5
-        if (self.rocketXDelta == -self.rocketAccel and self.rocketXDeltaWas == 0):
+        if (self.menuSelectionIndex == 0 and self.rocketXDelta == -self.rocketAccel and self.rocketXDeltaWas == 0):
             self.highScoreDifficulty = (self.highScoreDifficulty - 1) % 5
-        if self.enterPressed == True:
+        if self.menuSelectionIndex == 1 and self.enterPressed == True:
             self.screenMoveCounter = 0
             self.menuDirectory = "Main"
+            self.menuSelectionIndex = 4
         
 class gameScreen(object):
     def __init__(self, difficultySelection, screenSizeSelection, displayType):
@@ -831,7 +946,22 @@ class gameScreen(object):
             self.starMoveSpeed = self.myGameEventHandler.adjustStarMoveSpeed(self.maximumStarMoveSpeed, self.numberOfStarSpeeds)
             self.myGameEventHandler.updateScreenAndLimitFPS(60)
         
-        ##OUT OF THE GAME LOOP
+        #OUT OF THE GAME LOOP
+        self.myHighScoreDatabase = highScoresDatabase()
+        self.myHighScores = self.myHighScoreDatabase.loadHighScores()
+        self.alreadyRecievedHighScoreInfo = False
+        for self.i in xrange(10):
+            #self.myHighScores[self.difficultySelection][self.i][0] = 0
+            if self.score > int(self.myHighScores[self.difficultySelection][self.i][2]) and self.alreadyRecievedHighScoreInfo == False:
+                self.highScoreName, self.highScoreState, self.highScoreCountry = self.myGameEventHandler.newHighScore(self.displayWidth, self.displayHeight)
+                self.alreadyRecievedHighScoreInfo = True
+        self.myHighScores[self.difficultySelection].append(["0", self.highScoreName, str(self.score), self.highScoreState, self.highScoreCountry])
+        self.myHighScores[self.difficultySelection] = sorted(self.myHighScores[self.difficultySelection], key = itemgetter(2), reverse = True)
+        self.myHighScores[self.difficultySelection].pop()
+        for self.i in xrange(10):
+            self.myHighScores[self.difficultySelection][self.i][0] = self.i + 1
+        self.myHighScoreDatabase.updateHighScores(self.myHighScores[self.difficultySelection], self.difficultySelection)
+        #THIS iTH INDEX IS THE RANK USER SCORED IN
         del self.myGameEventHandler
         return self.difficultySelection, self.screenSizeSelection, self.displayType, self.exiting
 
