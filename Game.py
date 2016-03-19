@@ -38,6 +38,28 @@ class gameEventHandler(object):
         self.textRect.center = ((self.displayWidth-60), 15 + (15*self.lineNumber))
         gameDisplay.blit(self.textSurf, self.textRect)
 
+    def handleIfUserGotHighScore(self, difficultySelection, score, displayWidth, displayHeight):
+        self.myHighScoreDatabase = highScoresDatabase()
+        self.myHighScores = self.myHighScoreDatabase.loadHighScores()
+        self.difficultySelection = difficultySelection
+        self.score = score
+        self.displayWidth = displayWidth
+        self.displayHeight = displayHeight
+
+        self.alreadyRecievedHighScoreInfo = False
+        for self.handleHighScoreCounter in xrange(10):
+            if self.score > int(self.myHighScores[self.difficultySelection][self.handleHighScoreCounter][2]) and self.alreadyRecievedHighScoreInfo == False:
+                self.highScoreName, self.highScoreState, self.highScoreCountry = self.newHighScore(self.displayWidth, self.displayHeight)
+                self.alreadyRecievedHighScoreInfo = True
+        if self.alreadyRecievedHighScoreInfo == True:
+            self.myHighScores[self.difficultySelection].append([0, self.highScoreName, self.score, self.highScoreState, self.highScoreCountry])
+            self.myHighScores[self.difficultySelection] = sorted(self.myHighScores[self.difficultySelection], key = itemgetter(2), reverse = True)
+            self.myHighScores[self.difficultySelection].pop()
+            for self.handleHighScoreCounter in xrange(10):
+                self.myHighScores[self.difficultySelection][self.handleHighScoreCounter][0] = self.handleHighScoreCounter + 1
+            self.myHighScoreDatabase.updateHighScoresForThisDifficulty(self.myHighScores[self.difficultySelection], self.difficultySelection)
+        del self.myHighScoreDatabase
+
     def textInput(self, questionString, displayWidth, displayHeight):
         self.displayWidth = displayWidth
         self.displayHeight = displayHeight
@@ -59,57 +81,57 @@ class gameEventHandler(object):
                 if len(self.inputString) < 17:
                     if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_a:
                         self.inputString = self.inputString + "A"
-                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_b:
+                    elif self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_b:
                         self.inputString = self.inputString + "B"
-                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_c:
+                    elif self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_c:
                         self.inputString = self.inputString + "C"
-                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_d:
+                    elif self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_d:
                         self.inputString = self.inputString + "D"
-                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_e:
+                    elif self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_e:
                         self.inputString = self.inputString + "E"
-                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_f:
+                    elif self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_f:
                         self.inputString = self.inputString + "F"
-                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_g:
+                    elif self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_g:
                         self.inputString = self.inputString + "G"
-                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_h:
+                    elif self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_h:
                         self.inputString = self.inputString + "H"
-                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_i:
+                    elif self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_i:
                         self.inputString = self.inputString + "I"
-                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_j:
+                    elif self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_j:
                         self.inputString = self.inputString + "J"
-                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_k:
+                    elif self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_k:
                         self.inputString = self.inputString + "K"
-                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_l:
+                    elif self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_l:
                         self.inputString = self.inputString + "L"
-                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_m:
+                    elif self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_m:
                         self.inputString = self.inputString + "M"
-                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_n:
+                    elif self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_n:
                         self.inputString = self.inputString + "N"
-                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_o:
+                    elif self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_o:
                         self.inputString = self.inputString + "O"
-                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_p:
+                    elif self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_p:
                         self.inputString = self.inputString + "P"
-                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_q:
+                    elif self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_q:
                         self.inputString = self.inputString + "Q"
-                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_r:
+                    elif self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_r:
                         self.inputString = self.inputString + "R"
-                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_s:
+                    elif self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_s:
                         self.inputString = self.inputString + "S"
-                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_t:
+                    elif self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_t:
                         self.inputString = self.inputString + "T"
-                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_u:
+                    elif self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_u:
                         self.inputString = self.inputString + "U"
-                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_v:
+                    elif self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_v:
                         self.inputString = self.inputString + "V"
-                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_w:
+                    elif self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_w:
                         self.inputString = self.inputString + "W"
-                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_x:
+                    elif self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_x:
                         self.inputString = self.inputString + "X"
-                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_y:
+                    elif self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_y:
                         self.inputString = self.inputString + "Y"
-                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_z:
+                    elif self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_z:
                         self.inputString = self.inputString + "Z"
-                    if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_SPACE:
+                    elif self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_SPACE:
                         self.inputString = self.inputString + " "
 
     def drawObject(self, myObject, drawX, drawY):
@@ -156,6 +178,11 @@ class gameEventHandler(object):
         gameDisplay.fill(black)
         return self.highScoreName, self.highScoreState, self.highScoreCountry
 
+    def bonusAttributes(self, bonusType):
+        if bonusType == "Health":
+            return ["Health Bonus", self.rndNumb, 0, 80 , 30 , 255, 255, 255, self.starMoveSpeed, -5, 0, 0]
+        elif bonusType == "Ammo":
+            return ["Ammo Bonus", self.rndNumb, 0, 80 , 30 , 255, 255, 255, self.starMoveSpeed, 0, 0, 500]
 
     def loadBulletInfoIntomyProjectilesMatrix(self, gunType, belongsToEnemy, dx, difficultySelection, displayHeight):
         self.gunType = gunType
@@ -295,6 +322,22 @@ class gameEventHandler(object):
         self.difficultySelection = difficultySelection
         return random.randint(1, int((1/float(self.aggressionLevel)) * (120/float(1.0 + self.difficultySelection))))
 
+    def generateBonus(self, myProjectiles, difficultySelection, displayWidth, starMoveSpeed):
+        self.difficultySelection = difficultySelection
+        self.myProjectiles = myProjectiles
+        self.displayWidth = displayWidth
+        self.starMoveSpeed = starMoveSpeed
+        #ADD HEALTH BONUS
+        if random.randint(1, 20) == 1:
+            self.rndNumb = random.randint(1, self.displayWidth - self.bonusAttributes("Health")[3])
+            self.myProjectiles.append(self.bonusAttributes("Health"))
+        #ADD AMMO BONUS
+        if random.randint(1, 20) == 1:
+            self.rndNumb = random.randint(1, self.displayWidth - self.bonusAttributes("Ammo")[3])
+            self.myProjectiles.append(self.bonusAttributes("Ammo"))
+        
+        return self.myProjectiles
+
     def addGameObjects(self, enemiesAlive, currentLevel, currentGun, myEnemies, starProbabilitySpace, starDensity, starMoveSpeed, myProjectiles, displayWidth):
         self.enemiesAlive = enemiesAlive
         self.currentLevel = currentLevel
@@ -317,8 +360,9 @@ class gameEventHandler(object):
         #ADD STARS
         if random.randint(1, self.starProbabilitySpace) in xrange(1, int(self.starDensity * self.starProbabilitySpace)+1):
             self.rndNumb = random.randint(1, self.displayWidth)
-                                    #NAME, X1,    Y1,WIDTH,HEIGHT,   R,   G,   B,    SPEED  NO VALUE THIS IS JUST TO KEEP ALL ROWS IN THE PROJECTILE ARRAY THE SAME LENGTH
-            self.myProjectiles.append(["Star", self.rndNumb, 0, 1 , 1 , 255, 255, 255, self.starMoveSpeed, 0, 0])
+                                        #label, x, y, width, height, r, g, b, speed, damage, dx, ammo
+            self.myProjectiles.append(["Star", self.rndNumb, 0, 1 , 1 , 255, 255, 255, self.starMoveSpeed, 0, 0, 0])
+
         return self.currentLevel, self.currentGun, self.enemiesAlive, self.myEnemies, self.myProjectiles
 
     def movePlayer(self, x, y, rocketWidth, rocketHeight, rocketXDelta, rocketYDelta, displayWidth, displayHeight):
@@ -339,7 +383,7 @@ class gameEventHandler(object):
         self.y = self.y + self.rocketYDelta
         return self.x, self.y
 
-    def moveAndDrawProjectilesAndEnemies(self, myProjectiles, myEnemies, myHealth, score, enemiesAlive, x, y, rocketWidth, rocketHeight, difficultySelection, displayWidth, displayHeight):
+    def moveAndDrawProjectilesAndEnemies(self, myProjectiles, myEnemies, myHealth, score, enemiesAlive, x, y, rocketWidth, rocketHeight, difficultySelection, displayWidth, displayHeight, ammo, starMoveSpeed):
         self.myProjectiles = myProjectiles
         self.myEnemies = myEnemies
         self.myHealth = myHealth
@@ -352,16 +396,19 @@ class gameEventHandler(object):
         self.difficultySelection = difficultySelection
         self.displayWidth = displayWidth
         self.displayHeight = displayHeight
+        self.ammo = ammo
+        self.starMoveSpeed = starMoveSpeed
         self.myDeleteList = []
-        for self.i in xrange(len(self.myProjectiles)): #for each bullet and star
-            if (self.myProjectiles[self.i][0] == "Star" or str(self.myProjectiles[self.i][0])[:4] == "Enem"): #if this projectile is a star or enemy bullet,
+        for self.i in xrange(len(self.myProjectiles)): #for each bullet, star, and game bonus
+            if (self.myProjectiles[self.i][0] == "Star" or str(self.myProjectiles[self.i][0])[:4] == "Enem" or "Bonus" in self.myProjectiles[self.i][0]): #if this projectile is a star or enemy bullet,
                 if self.myProjectiles[self.i][2] + self.myProjectiles[self.i][8] + 1 >= self.displayHeight or self.myProjectiles[self.i][2] + self.myProjectiles[self.i][4] + self.myProjectiles[self.i][8] -1 <= 0: #if it's going beyond the top/bottom of the screen
                     self.myDeleteList.append(self.i) #flag it for deletion by putting it in a list which we later use to delete it from myProjectiles. Deleting now wreaks havoc on our for loop
                 else:
                     self.hit = False
                     #otherwise if it's not going beyond the screen limits, then if it's an enemy bullet that hit the user, then
-                    if str(self.myProjectiles[self.i][0])[:4] == "Enem" and ((self.myProjectiles[self.i][1] + self.myProjectiles[self.i][3] >= x) and (self.myProjectiles[self.i][1] <= x + self.rocketWidth) and (self.myProjectiles[self.i][2] + self.myProjectiles[self.i][4] >= self.y) and (self.myProjectiles[self.i][2] <= self.y + self.rocketHeight)):
-                        self.myHealth = self.myHealth - self.myProjectiles[self.i][9]
+                    if (str(self.myProjectiles[self.i][0])[:4] == "Enem" or "Bonus" in self.myProjectiles[self.i][0]) and ((self.myProjectiles[self.i][1] + self.myProjectiles[self.i][3] >= x) and (self.myProjectiles[self.i][1] <= x + self.rocketWidth) and (self.myProjectiles[self.i][2] + self.myProjectiles[self.i][4] >= self.y) and (self.myProjectiles[self.i][2] <= self.y + self.rocketHeight)):
+                        self.myHealth = min(self.myHealth - self.myProjectiles[self.i][9], 100) #Health bonus shouldn't make player health > 100
+                        self.ammo = self.ammo + self.myProjectiles[self.i][11]
                         self.myDeleteList.append(self.i)
                         self.hit = True
                     if (str(self.myProjectiles[self.i][0]) == "Enemy Bullet - Teleport"):
@@ -370,6 +417,7 @@ class gameEventHandler(object):
                         else:
                             self.myProjectiles[self.i][10] = self.enemyMovementAI(self.myProjectiles[self.i], self.displayWidth, self.displayHeight)
                             self.myProjectiles[self.i][1] = self.myProjectiles[self.i][1] + self.myProjectiles[self.i][10]
+                        
             elif str(self.myProjectiles[self.i][0])[:4] == "My B": #otherwise if it's actually user's bullet
                 if self.myProjectiles[self.i][2] + self.myProjectiles[self.i][8] - 1 < 0: #if it's going above the top of the screen,
                     self.myDeleteList.append(self.i) #flag this projectile for deletion
@@ -379,16 +427,23 @@ class gameEventHandler(object):
                         if ((self.myProjectiles[self.i][1] + self.myProjectiles[self.i][3] >= self.myEnemies[self.j][6]) and (self.myProjectiles[self.i][1] <= self.myEnemies[self.j][6] + self.myEnemies[self.j][10]) and (self.myProjectiles[self.i][2] + self.myProjectiles[self.i][4] >= self.myEnemies[self.j][7]) and (self.myProjectiles[self.i][2] <= self.myEnemies[self.j][7] + self.myEnemies[self.j][11])) or ((self.myProjectiles[self.i][1] + self.myProjectiles[self.i][3] >= self.myEnemies[self.j][6]) and (self.myProjectiles[self.i][1] <= self.myEnemies[self.j][6] + self.myEnemies[self.j][10]) and (self.myProjectiles[self.i][2] + self.myProjectiles[self.i][4] + (self.myProjectiles[self.i][8]/2.0) >= self.myEnemies[self.j][7]) and (self.myProjectiles[self.i][2] + (self.myProjectiles[self.i][8]/2.0) <= self.myEnemies[self.j][7] + self.myEnemies[self.j][11])):
                             self.myEnemies[self.j][2] = self.myEnemies[self.j][2] - self.myProjectiles[self.i][9] #reduce enemy health
                             self.myDeleteList.append(self.i) #flag this bullet for deletion
+                            self.myProjectiles = self.generateBonus(self.myProjectiles, self.difficultySelection, self.displayWidth, self.starMoveSpeed)
             #move this projectile in the direction it needs to go
             self.myProjectiles[self.i][2] = self.myProjectiles[self.i][2] + self.myProjectiles[self.i][8]
+            #draw this projectile
             if (str(self.myProjectiles[self.i][0])[:4] == "My B"):
                                     #SURFACE, (R,G,B), ((X1Y1), (X2Y1), (X2Y2), (X1Y2))
                 pygame.draw.polygon(gameDisplay, (self.myProjectiles[self.i][5], self.myProjectiles[self.i][6], self.myProjectiles[self.i][7]), ((self.myProjectiles[self.i][1], self.myProjectiles[self.i][2] + self.myProjectiles[self.i][4]), (self.myProjectiles[self.i][1] + (self.myProjectiles[self.i][3]), self.myProjectiles[self.i][2] + self.myProjectiles[self.i][4]),  (self.myProjectiles[self.i][1] + (self.myProjectiles[self.i][3]/2.0), self.myProjectiles[self.i][2]), (self.myProjectiles[self.i][1] + (self.myProjectiles[self.i][3]/2.0), self.myProjectiles[self.i][2])), 0)
             elif (str(self.myProjectiles[self.i][0]) == "Enemy Bullet - Teleport"):
                 pygame.draw.polygon(gameDisplay, (self.myProjectiles[self.i][5], self.myProjectiles[self.i][6], self.myProjectiles[self.i][7]), ((self.myProjectiles[self.i][1], max(self.myProjectiles[self.i][2] + self.myProjectiles[self.i][4], self.enemy(0)[11])), (self.myProjectiles[self.i][1] + (self.myProjectiles[self.i][3]), max(self.myProjectiles[self.i][2] + self.myProjectiles[self.i][4], self.enemy(0)[11])),  (self.myProjectiles[self.i][1] + (self.myProjectiles[self.i][3]/2.0), max(self.myProjectiles[self.i][2], self.enemy(0)[11])), (self.myProjectiles[self.i][1] + (self.myProjectiles[self.i][3]/2.0), max(self.myProjectiles[self.i][2], self.enemy(0)[11]))), 0)
+            elif (str(self.myProjectiles[self.i][0]) == "Health Bonus"): #but if it's a game bonus, then display
+                self.drawObject(HealthBonus, self.myProjectiles[self.i][1], self.myProjectiles[self.i][2])
+            elif (str(self.myProjectiles[self.i][0]) == "Ammo Bonus"): #but if it's a game bonus, then display
+                self.drawObject(AmmoBonus, self.myProjectiles[self.i][1], self.myProjectiles[self.i][2])
             else:
                 pygame.draw.polygon(gameDisplay, (self.myProjectiles[self.i][5], self.myProjectiles[self.i][6], self.myProjectiles[self.i][7]), ((self.myProjectiles[self.i][1], self.myProjectiles[self.i][2]), (self.myProjectiles[self.i][1] + (self.myProjectiles[self.i][3]), self.myProjectiles[self.i][2]),  (self.myProjectiles[self.i][1] + (self.myProjectiles[self.i][3]/2.0), self.myProjectiles[self.i][2] + self.myProjectiles[self.i][4]), (self.myProjectiles[self.i][1] + (self.myProjectiles[self.i][3]/2.0), self.myProjectiles[self.i][2] + self.myProjectiles[self.i][4])), 0)
             
+
         #delete those projectiles we flagged for deletion
         for self.i in xrange(len(self.myDeleteList)):
             del self.myProjectiles[self.myDeleteList[self.i]-self.i]
@@ -402,7 +457,7 @@ class gameEventHandler(object):
             else:
                 if self.enemyAttackAI(self.myEnemies[self.i][3], self.difficultySelection) == 1: #decide if enemy will attack
                     self.bulletProperties = self.loadBulletInfoIntomyProjectilesMatrix(self.myEnemies[self.i][1], True, self.myEnemies[self.i][8], self.difficultySelection, self.displayHeight) #if the enemy is attacking, then load the bullet in the projectile matrix
-                    self.myProjectiles.append([self.bulletProperties[0], self.myEnemies[self.i][6] + (self.myEnemies[self.i][10]/2.0) - (self.bulletProperties[1]/2.0), self.myEnemies[self.i][7] , self.bulletProperties[1], self.bulletProperties[2], self.bulletProperties[3], self.bulletProperties[4], self.bulletProperties[5], self.bulletProperties[6], self.bulletProperties[7], self.bulletProperties[8]])
+                    self.myProjectiles.append([self.bulletProperties[0], self.myEnemies[self.i][6] + (self.myEnemies[self.i][10]/2.0) - (self.bulletProperties[1]/2.0), self.myEnemies[self.i][7], self.bulletProperties[1], self.bulletProperties[2], self.bulletProperties[3], self.bulletProperties[4], self.bulletProperties[5], self.bulletProperties[6], self.bulletProperties[7], self.bulletProperties[8], 0])
                 self.myEnemies[self.i][6] = self.myEnemies[self.i][6] + self.myEnemies[self.i][8] #move this enemy
                 self.myEnemies[self.i][7] = self.myEnemies[self.i][7] + self.myEnemies[self.i][9]
                 self.drawFromFile(self.myEnemies[self.i][5], self.myEnemies[self.i][6], self.myEnemies[self.i][7])
@@ -410,7 +465,7 @@ class gameEventHandler(object):
         #delete enemies that were flagged for completion
         for self.i in xrange(len(self.myDeleteList)):
             del self.myEnemies[self.myDeleteList[self.i]-self.i]
-        return self.myProjectiles, self.myEnemies, self.myHealth, self.score, self.enemiesAlive, self.y
+        return self.myProjectiles, self.myEnemies, self.myHealth, self.score, self.enemiesAlive, self.y, self.ammo
 
     def testIfPlayerLost(self, myHealth, exiting, score, displayWidth, displayHeight):
         self.myHealth = myHealth
@@ -461,7 +516,7 @@ class gameEventHandler(object):
             if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_SPACE and self.ammo >0: #MAKE USER NEED TO PRESS SPACE OVER AND OVER TO FIRE
                 self.ammo = self.ammo - 1
                 self.bulletProperties = self.loadBulletInfoIntomyProjectilesMatrix(self.currentGun, False, 0, self.difficultySelection, self.displayHeight)
-                self.myProjectiles.append([self.bulletProperties[0], x + (self.rocketWidth/2.0) - int((self.bulletProperties[1]/2.0)), self.y , self.bulletProperties[1], self.bulletProperties[2], self.bulletProperties[3], self.bulletProperties[4], self.bulletProperties[5], self.bulletProperties[6], self.bulletProperties[7], 0])
+                self.myProjectiles.append([self.bulletProperties[0], x + (self.rocketWidth/2.0) - int((self.bulletProperties[1]/2.0)), self.y, self.bulletProperties[1], self.bulletProperties[2], self.bulletProperties[3], self.bulletProperties[4], self.bulletProperties[5], self.bulletProperties[6], self.bulletProperties[7], 0, 0])
                 #print "Firing! Damage: " + str(myProjectiles[len(myProjectiles)-1][9])
         self.rocketXDelta = 0
         self.rocketYDelta = 0
@@ -481,7 +536,7 @@ class highScoresDatabase(object):
         self.iNeedThisManyMoreBlankSlots = 10 - len(self.workingArray)
         self.n = 0
         self.b = [[],]
-        for row in xrange(self.iNeedThisManyMoreBlankSlots):
+        for self.row in xrange(self.iNeedThisManyMoreBlankSlots):
             self.n = self.n + 1
             self.b.append([self.n, "-", 0, "-", "-"])
         self.b.remove([])
@@ -490,73 +545,95 @@ class highScoresDatabase(object):
         return self.b
 
     def loadHighScores(self):
-        self.highScoresArray = [[],]
-        self.connection = sqlite3.connect("High_Scores.db")
         try:
-            for self.i in xrange(5):
-                self.c = self.connection.cursor()
-                self.c.execute("""
-                SELECT * FROM easyHighScoreTable ORDER BY scoreRecordPK
-                """)
-                self.a = [[],]
-                for self.row in self.c.fetchall():
-                    self.a.append([str(self.row[0]), str(self.row[1]), str(self.row[2]), str(self.row[3]), str(self.row[4])])
-                    #self.highScoresArray.append([row(0), row(1), row(2), row(3), row(4)])
-                self.a.remove([])
-                #self.a = self.fillInBlankHighScores(self.a)
-                self.highScoresArray.insert(self.i, self.a)
-        except:
+            self.highScoresArray = [[],]
             self.connection = sqlite3.connect("High_Scores.db")
             self.c = self.connection.cursor()
-            self.c.execute("DROP TABLE IF EXISTS easyHighScoreTable")
-            self.c.execute("CREATE TABLE easyHighScoreTable(scoreRecordPK INT, Name TEXT, Score INT, State TEXT, Country TEXT)")
-            self.c.execute("DROP TABLE IF EXISTS mediumHighScoreTable")
-            self.c.execute("CREATE TABLE mediumHighScoreTable(scoreRecordPK INT, Name TEXT, Score INT, State TEXT, Country TEXT)")
-            self.c.execute("DROP TABLE IF EXISTS hardHighScoreTable")
-            self.c.execute("CREATE TABLE hardHighScoreTable(scoreRecordPK INT, Name TEXT, Score INT, State TEXT, Country TEXT)")
-            self.c.execute("DROP TABLE IF EXISTS expertHighScoreTable")
-            self.c.execute("CREATE TABLE expertHighScoreTable(scoreRecordPK INT, Name TEXT, Score INT, State TEXT, Country TEXT)")
-            self.c.execute("DROP TABLE IF EXISTS lolHighScoreTable")
-            self.c.execute("CREATE TABLE lolHighScoreTable(scoreRecordPK INT, Name TEXT, Score INT, State TEXT, Country TEXT)")
-            for self.i in xrange(5):
-                #self.highScoresArray.append([])
-                self.highScoresArray.insert(self.i, self.fillInBlankHighScores(self.highScoresArray[self.i]))
-                #self.highScoresArray = self.fillInBlankHighScores(self.highScoresArray[self.i])
-            self.highScoresArray.remove([])
-            for self.i in xrange(5):
-                self.updateHighScores(self.highScoresArray[self.i], self.i)
+            self.row = ([])
+            for self.loadCounter in xrange(5):
+                self.a = [[],]
+                if self.loadCounter == 0:
+                    self.c.execute("""SELECT * FROM easyHighScoreTable ORDER BY scoreRecordPK""")
+                elif self.loadCounter == 1:
+                    self.c.execute("""SELECT * FROM mediumHighScoreTable ORDER BY scoreRecordPK""")
+                elif self.loadCounter == 2:
+                    self.c.execute("""SELECT * FROM hardHighScoreTable ORDER BY scoreRecordPK""")
+                elif self.loadCounter == 3:
+                    self.c.execute("""SELECT * FROM expertHighScoreTable ORDER BY scoreRecordPK""")
+                elif self.loadCounter == 4:
+                    self.c.execute("""SELECT * FROM lolHighScoreTable ORDER BY scoreRecordPK""")  
+                for self.row in self.c.fetchall():
+                    self.a.append([self.row[0], str(self.row[1]), self.row[2], str(self.row[3]), str(self.row[4])])
+                #self.highScoresArray.append([row(0), row(1), row(2), row(3), row(4)])
+                self.a.remove([])
+                #self.a = self.fillInBlankHighScores(self.a)
+                self.highScoresArray.insert(self.loadCounter, self.a)
+        except:
+            self.initializeDatabase()
+        
         self.connection.close()
         return self.highScoresArray
 
-    def updateHighScores(self, workingArray, difficulty):
-        self.workingArray = workingArray
-        self.difficulty = difficulty
+    def initializeDatabase(self):
         self.connection = sqlite3.connect("High_Scores.db")
         self.c = self.connection.cursor()
-        self.i = -1
-        for self.row in self.workingArray:
-            self.i = self.i + 1
-            if self.difficulty == 0:
-                self.c.execute("DROP TABLE IF EXISTS easyHighScoreTable")
-                self.c.execute("CREATE TABLE easyHighScoreTable(scoreRecordPK INT, Name TEXT, Score INT, State TEXT, Country TEXT)")
-                self.c.execute("INSERT INTO easyHighScoreTable Values(?, ?, ?, ?, ?)", tuple((int(workingArray[self.i][0]), self.workingArray[self.i][1], int(self.workingArray[self.i][2]), self.workingArray[self.i][3], self.workingArray[self.i][4])))
-            if self.difficulty == 1:
-                self.c.execute("DROP TABLE IF EXISTS mediumHighScoreTable")
-                self.c.execute("CREATE TABLE mediumHighScoreTable(scoreRecordPK INT, Name TEXT, Score INT, State TEXT, Country TEXT)")
-                self.c.execute("INSERT INTO mediumHighScoreTable Values(?, ?, ?, ?, ?)", tuple((int(workingArray[self.i][0]), self.workingArray[self.i][1], int(self.workingArray[self.i][2]), self.workingArray[self.i][3], self.workingArray[self.i][4])))
-            if self.difficulty == 2:
-                self.c.execute("DROP TABLE IF EXISTS hardHighScoreTable")
-                self.c.execute("CREATE TABLE hardHighScoreTable(scoreRecordPK INT, Name TEXT, Score INT, State TEXT, Country TEXT)")
-                self.c.execute("INSERT INTO hardHighScoreTable Values(?, ?, ?, ?, ?)", tuple((int(workingArray[self.i][0]), self.workingArray[self.i][1], int(self.workingArray[self.i][2]), self.workingArray[self.i][3], self.workingArray[self.i][4])))
-            if self.difficulty == 3:
-                self.c.execute("DROP TABLE IF EXISTS expertHighScoreTable")
-                self.c.execute("CREATE TABLE expertHighScoreTable(scoreRecordPK INT, Name TEXT, Score INT, State TEXT, Country TEXT)")
-                self.c.execute("INSERT INTO expertHighScoreTable Values(?, ?, ?, ?, ?)", tuple((int(workingArray[self.i][0]), self.workingArray[self.i][1], int(self.workingArray[self.i][2]), self.workingArray[self.i][3], self.workingArray[self.i][4])))
-            if self.difficulty == 4:
-                self.c.execute("DROP TABLE IF EXISTS lolHighScoreTable")
-                self.c.execute("CREATE TABLE lolHighScoreTable(scoreRecordPK INT, Name TEXT, Score INT, State TEXT, Country TEXT)")
-                self.c.execute("INSERT INTO lolHighScoreTable Values(?, ?, ?, ?, ?)", tuple((int(workingArray[self.i][0]), self.workingArray[self.i][1], int(self.workingArray[self.i][2]), self.workingArray[self.i][3], self.workingArray[self.i][4])))
-        self.connection.commit()
+        self.c.execute("DROP TABLE IF EXISTS easyHighScoreTable")
+        self.c.execute("CREATE TABLE easyHighScoreTable(scoreRecordPK INT, Name TEXT, Score INT, State TEXT, Country TEXT)")
+        self.c.execute("DROP TABLE IF EXISTS mediumHighScoreTable")
+        self.c.execute("CREATE TABLE mediumHighScoreTable(scoreRecordPK INT, Name TEXT, Score INT, State TEXT, Country TEXT)")
+        self.c.execute("DROP TABLE IF EXISTS hardHighScoreTable")
+        self.c.execute("CREATE TABLE hardHighScoreTable(scoreRecordPK INT, Name TEXT, Score INT, State TEXT, Country TEXT)")
+        self.c.execute("DROP TABLE IF EXISTS expertHighScoreTable")
+        self.c.execute("CREATE TABLE expertHighScoreTable(scoreRecordPK INT, Name TEXT, Score INT, State TEXT, Country TEXT)")
+        self.c.execute("DROP TABLE IF EXISTS lolHighScoreTable")
+        self.c.execute("CREATE TABLE lolHighScoreTable(scoreRecordPK INT, Name TEXT, Score INT, State TEXT, Country TEXT)")
+        for self.loadCounter in xrange(5):
+            #self.highScoresArray.append([])
+            self.highScoresArray.insert(self.loadCounter, self.fillInBlankHighScores(self.highScoresArray[self.loadCounter]))
+            #self.highScoresArray = self.fillInBlankHighScores(self.highScoresArray[self.loadCounter])
+        self.highScoresArray.remove([])
+        for self.loadCounter in xrange(5):
+            self.updateHighScoresForThisDifficulty(self.highScoresArray[self.loadCounter], self.loadCounter)
+        self.connection.close()
+        return self.highScoresArray
+                
+    def updateHighScoresForThisDifficulty(self, workingArray, difficulty):
+        try:
+            self.workingArray = workingArray
+            self.difficulty = difficulty
+            self.connection = sqlite3.connect("High_Scores.db")
+            self.c = self.connection.cursor()
+            self.updateCounter = -1
+            for self.row in self.workingArray:
+                self.updateCounter = self.updateCounter + 1
+                if self.difficulty == 0:
+                    if self.updateCounter == 0:
+                        self.c.execute("DROP TABLE IF EXISTS easyHighScoreTable")
+                        self.c.execute("CREATE TABLE easyHighScoreTable(scoreRecordPK INT, Name TEXT, Score INT, State TEXT, Country TEXT)")
+                    self.c.execute("INSERT INTO easyHighScoreTable Values(?, ?, ?, ?, ?)", tuple((int(workingArray[self.updateCounter][0]), self.workingArray[self.updateCounter][1], int(self.workingArray[self.updateCounter][2]), self.workingArray[self.updateCounter][3], self.workingArray[self.updateCounter][4])))
+                if self.difficulty == 1:
+                    if self.updateCounter == 0:
+                        self.c.execute("DROP TABLE IF EXISTS mediumHighScoreTable")
+                        self.c.execute("CREATE TABLE mediumHighScoreTable(scoreRecordPK INT, Name TEXT, Score INT, State TEXT, Country TEXT)")
+                    self.c.execute("INSERT INTO mediumHighScoreTable Values(?, ?, ?, ?, ?)", tuple((int(workingArray[self.updateCounter][0]), self.workingArray[self.updateCounter][1], int(self.workingArray[self.updateCounter][2]), self.workingArray[self.updateCounter][3], self.workingArray[self.updateCounter][4])))
+                if self.difficulty == 2:
+                    if self.updateCounter == 0:
+                        self.c.execute("DROP TABLE IF EXISTS hardHighScoreTable")
+                        self.c.execute("CREATE TABLE hardHighScoreTable(scoreRecordPK INT, Name TEXT, Score INT, State TEXT, Country TEXT)")
+                    self.c.execute("INSERT INTO hardHighScoreTable Values(?, ?, ?, ?, ?)", tuple((int(workingArray[self.updateCounter][0]), self.workingArray[self.updateCounter][1], int(self.workingArray[self.updateCounter][2]), self.workingArray[self.updateCounter][3], self.workingArray[self.updateCounter][4])))
+                if self.difficulty == 3:
+                    if self.updateCounter == 0:
+                        self.c.execute("DROP TABLE IF EXISTS expertHighScoreTable")
+                        self.c.execute("CREATE TABLE expertHighScoreTable(scoreRecordPK INT, Name TEXT, Score INT, State TEXT, Country TEXT)")
+                    self.c.execute("INSERT INTO expertHighScoreTable Values(?, ?, ?, ?, ?)", tuple((int(workingArray[self.updateCounter][0]), self.workingArray[self.updateCounter][1], int(self.workingArray[self.updateCounter][2]), self.workingArray[self.updateCounter][3], self.workingArray[self.updateCounter][4])))
+                if self.difficulty == 4:
+                    if self.updateCounter == 0:
+                        self.c.execute("DROP TABLE IF EXISTS lolHighScoreTable")
+                        self.c.execute("CREATE TABLE lolHighScoreTable(scoreRecordPK INT, Name TEXT, Score INT, State TEXT, Country TEXT)")
+                    self.c.execute("INSERT INTO lolHighScoreTable Values(?, ?, ?, ?, ?)", tuple((int(workingArray[self.updateCounter][0]), self.workingArray[self.updateCounter][1], int(self.workingArray[self.updateCounter][2]), self.workingArray[self.updateCounter][3], self.workingArray[self.updateCounter][4])))
+                self.connection.commit()
+        except:
+            self.initializeDatabase()
         self.connection.close()
 
 class menuScreen(object):
@@ -661,8 +738,8 @@ class menuScreen(object):
         self.currentLevel, self.currentGun, self.enemiesAlive, self.myEnemies, self.myProjectiles = self.menuGameEventHandler.addGameObjects(
             self.enemiesAlive, self.currentLevel, self.currentGun, self.myEnemies, self.starProbabilitySpace, self.starDensity, self.starMoveSpeed, self.myProjectiles, self.displayWidth)
         self.starMoveSpeed = self.menuGameEventHandler.adjustStarMoveSpeed(self.maximumStarMoveSpeed, self.numberOfStarSpeeds)
-        self.myProjectiles, self.myEnemies, self.myHealth, self.score, self.enemiesAlive, self.y = self.menuGameEventHandler.moveAndDrawProjectilesAndEnemies(
-            self.myProjectiles, self.myEnemies, self.myHealth, self.score, self.enemiesAlive, self.x, self.y, self.rocketWidth, self.rocketHeight, self.difficultySelection, self.displayWidth, self.displayHeight)
+        self.myProjectiles, self.myEnemies, self.myHealth, self.score, self.enemiesAlive, self.y, self.ammo = self.menuGameEventHandler.moveAndDrawProjectilesAndEnemies(
+            self.myProjectiles, self.myEnemies, self.myHealth, self.score, self.enemiesAlive, self.x, self.y, self.rocketWidth, self.rocketHeight, self.difficultySelection, self.displayWidth, self.displayHeight, self.ammo, self.starMoveSpeed)
         self.menuGameEventHandler.drawObject(myCharacter, self.x, self.y)
 
     def getKeyPress(self):
@@ -904,7 +981,7 @@ class gameScreen(object):
         self.lost = False
         self.rocketWidth = 48
         self.rocketHeight = 66
-        self.ammo = 50000
+        self.ammo = int(1000 * (1/(float(1 + self.difficultySelection))))
         self.enemiesAlive = 0
         self.currentLevel = 0
         self.currentGun = "Long Gun"
@@ -938,8 +1015,8 @@ class gameScreen(object):
                 "Game", self.ammo, self.currentGun, self.myProjectiles, self.rocketAccel, self.x, self.y, self.rocketWidth, self.difficultySelection, self.screenSizeSelection, self.displayType, self.allResolutionsAvail[self.screenSizeSelection][1]) 
             self.x, self.y = self.myGameEventHandler.movePlayer(self.x, self.y, self.rocketWidth, self.rocketHeight, self.rocketXDelta, self.rocketYDelta, self.allResolutionsAvail[self.screenSizeSelection][0], self.allResolutionsAvail[self.screenSizeSelection][1])
             gameDisplay.fill(black)
-            self.myProjectiles, self.myEnemies, self.myHealth, self.score, self.enemiesAlive, self.y = self.myGameEventHandler.moveAndDrawProjectilesAndEnemies(
-                self.myProjectiles, self.myEnemies, self.myHealth, self.score, self.enemiesAlive, self.x, self.y, self.rocketWidth, self.rocketHeight, self.difficultySelection, self.allResolutionsAvail[self.screenSizeSelection][0], self.allResolutionsAvail[self.screenSizeSelection][1])
+            self.myProjectiles, self.myEnemies, self.myHealth, self.score, self.enemiesAlive, self.y, self.ammo = self.myGameEventHandler.moveAndDrawProjectilesAndEnemies(
+                self.myProjectiles, self.myEnemies, self.myHealth, self.score, self.enemiesAlive, self.x, self.y, self.rocketWidth, self.rocketHeight, self.difficultySelection, self.allResolutionsAvail[self.screenSizeSelection][0], self.allResolutionsAvail[self.screenSizeSelection][1], self.ammo, self.starMoveSpeed)
             self.lost = self.myGameEventHandler.testIfPlayerLost(self.myHealth, self.exiting, self.score, self.allResolutionsAvail[self.screenSizeSelection][0], self.allResolutionsAvail[self.screenSizeSelection][1])
             self.myGameEventHandler.drawObject(myCharacter, self.x, self.y)
             self.myGameEventHandler.drawGameStats(self.myHealth, self.ammo, self.currentLevel, self.score, self.allResolutionsAvail[self.screenSizeSelection][0])
@@ -947,21 +1024,7 @@ class gameScreen(object):
             self.myGameEventHandler.updateScreenAndLimitFPS(60)
         
         #OUT OF THE GAME LOOP
-        self.myHighScoreDatabase = highScoresDatabase()
-        self.myHighScores = self.myHighScoreDatabase.loadHighScores()
-        self.alreadyRecievedHighScoreInfo = False
-        for self.i in xrange(10):
-            #self.myHighScores[self.difficultySelection][self.i][0] = 0
-            if self.score > int(self.myHighScores[self.difficultySelection][self.i][2]) and self.alreadyRecievedHighScoreInfo == False:
-                self.highScoreName, self.highScoreState, self.highScoreCountry = self.myGameEventHandler.newHighScore(self.displayWidth, self.displayHeight)
-                self.alreadyRecievedHighScoreInfo = True
-        self.myHighScores[self.difficultySelection].append(["0", self.highScoreName, str(self.score), self.highScoreState, self.highScoreCountry])
-        self.myHighScores[self.difficultySelection] = sorted(self.myHighScores[self.difficultySelection], key = itemgetter(2), reverse = True)
-        self.myHighScores[self.difficultySelection].pop()
-        for self.i in xrange(10):
-            self.myHighScores[self.difficultySelection][self.i][0] = self.i + 1
-        self.myHighScoreDatabase.updateHighScores(self.myHighScores[self.difficultySelection], self.difficultySelection)
-        #THIS iTH INDEX IS THE RANK USER SCORED IN
+        self.myGameEventHandler.handleIfUserGotHighScore(self.difficultySelection, self.score, self.displayWidth, self.displayHeight)
         del self.myGameEventHandler
         return self.difficultySelection, self.screenSizeSelection, self.displayType, self.exiting
 
@@ -975,6 +1038,8 @@ allResolutionsAvail.sort()
 displayWidth = allResolutionsAvail[(int(len(allResolutionsAvail)/2.0))][0]
 displayHeight = allResolutionsAvail[(int(len(allResolutionsAvail)/2.0))][1]
 myCharacter = pygame.image.load("Rocket.png")
+HealthBonus = pygame.image.load("Health Bonus.png")
+AmmoBonus = pygame.image.load("Ammo Bonus.png")
 UFO = pygame.image.load("Ufo.png")
 BlueBomber = pygame.image.load("Blue Bomber.png")
 HJet = pygame.image.load("H Jet.png")
