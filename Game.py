@@ -818,7 +818,7 @@ class menuScreen(object):
                 self.text = "Music/SFX by Mike Finnegan"
             self.textSurf, self.textRect = self.menuGameEventHandler.textObjects(self.text, self.smallText, self.rgb)
             #self.textRect.center = ((self.displayWidth/2), (self.displayHeight/2 - self.i*(self.rocketAccel)))
-            self.textRect.center = ((self.displayWidth/2.0), (self.i * 25 + self.screenMoveCounter - self.displayHeight/2.0))
+            self.textRect.center = ((self.displayWidth/2.0), ((self.i * self.rocketAccel) + self.screenMoveCounter - self.displayHeight/2.0))
             gameDisplay.blit(self.textSurf, self.textRect)
 
     def displayHowToMenu(self):
@@ -836,7 +836,7 @@ class menuScreen(object):
                 self.text = "Arrow keys Up, Down, Left, Right: fly spacecraft"
             self.textSurf, self.textRect = self.menuGameEventHandler.textObjects(self.text, self.smallText, self.rgb)
             #self.textRect.center = ((self.displayWidth/2), (self.displayHeight/2 - self.i*(self.rocketAccel)))
-            self.textRect.center = ((self.displayWidth/2.0), (self.i * 25 + self.screenMoveCounter - self.displayHeight/2.0))
+            self.textRect.center = ((self.displayWidth/2.0), ((self.i * self.rocketAccel) + self.screenMoveCounter - self.displayHeight/2.0))
             gameDisplay.blit(self.textSurf, self.textRect)
 
     def displayHighScoresMenu(self):
@@ -872,7 +872,7 @@ class menuScreen(object):
                         self.text = "Country"
                     self.textSurf, self.textRect = self.menuGameEventHandler.textObjects(self.text, self.smallText, self.rgb)
                     #self.textRect.center = ((self.displayWidth/2), (self.displayHeight/2 - self.i*(self.rocketAccel)))
-                    self.textRect.center = ((self.displayWidth*((self.j+1)/6.0)), (self.i * 25 + self.displayHeight/2.0))
+                    self.textRect.center = ((self.displayWidth*((self.j+1)/6.0)), ((self.i * self.rocketAccel) + self.displayHeight/2.0))
                 elif self.i == self.myHighScoreDatabase.numberOfRecordsPerDifficulty:
                     if self.menuSelectionIndex == 1:
                         self.rgb = (self.colorIntensity, 0, 0)
@@ -886,7 +886,7 @@ class menuScreen(object):
                     self.text = str(self.myHighScores[self.highScoreDifficulty][self.i][self.j])
                     self.textSurf, self.textRect = self.menuGameEventHandler.textObjects(self.text, self.smallText, self.rgb)
                     #self.textRect.center = ((self.displayWidth/2), (self.displayHeight/2 - self.i*(self.rocketAccel)))
-                    self.textRect.center = ((self.displayWidth*((self.j+1)/6.0)), (self.i * 25 + self.displayHeight/2.0))
+                    self.textRect.center = ((self.displayWidth*((self.j+1)/6.0)), ((self.i * self.rocketAccel) + self.displayHeight/2.0))
                 gameDisplay.blit(self.textSurf, self.textRect)
 
     def handleUserInputMainMenu(self):
@@ -974,7 +974,7 @@ class menuScreen(object):
         
 class gameScreen(object):
     def __init__(self, difficultySelection, screenSizeSelection, displayType):
-        self.difficultySelection = difficultySelection
+        self.difficultySelection = difficultySelection  
         self.screenSizeSelection = screenSizeSelection
         self.displayType = displayType
         self.allResolutionsAvail = pygame.display.list_modes()
@@ -1018,7 +1018,8 @@ class gameScreen(object):
             self.exiting, self.ammo, self.myProjectiles, self.rocketXDelta, self.rocketYDelta, self.enterPressed, self.screenSizeSelection, self.displayType = self.myGameEventHandler.handleKeyPresses(
                 "Game", self.ammo, self.currentGun, self.myProjectiles, self.rocketAccel, self.x, self.y, self.rocketWidth, self.difficultySelection, self.screenSizeSelection, self.displayType, self.allResolutionsAvail[self.screenSizeSelection][1]) 
             self.x, self.y = self.myGameEventHandler.movePlayer(self.x, self.y, self.rocketWidth, self.rocketHeight, self.rocketXDelta, self.rocketYDelta, self.allResolutionsAvail[self.screenSizeSelection][0], self.allResolutionsAvail[self.screenSizeSelection][1])
-            gameDisplay.fill(black)
+            #gameDisplay.fill(black)
+            gameDisplay.blit(background, (0, 0))
             self.myProjectiles, self.myEnemies, self.myHealth, self.score, self.enemiesAlive, self.y, self.ammo = self.myGameEventHandler.moveAndDrawProjectilesAndEnemies(
                 self.myProjectiles, self.myEnemies, self.myHealth, self.score, self.enemiesAlive, self.x, self.y, self.rocketWidth, self.rocketHeight, self.difficultySelection, self.allResolutionsAvail[self.screenSizeSelection][0], self.allResolutionsAvail[self.screenSizeSelection][1], self.ammo, self.starMoveSpeed)
             self.lost = self.myGameEventHandler.testIfPlayerLost(self.myHealth, self.exiting, self.score, self.allResolutionsAvail[self.screenSizeSelection][0], self.allResolutionsAvail[self.screenSizeSelection][1])
@@ -1042,13 +1043,14 @@ allResolutionsAvail = pygame.display.list_modes()
 allResolutionsAvail.sort()
 displayWidth = allResolutionsAvail[(int(len(allResolutionsAvail)/2.0))][0]
 displayHeight = allResolutionsAvail[(int(len(allResolutionsAvail)/2.0))][1]
-myCharacter = pygame.image.load("Rocket.png")
-HealthBonus = pygame.image.load("Health Bonus.png")
-AmmoBonus = pygame.image.load("Ammo Bonus.png")
-UFO = pygame.image.load("Ufo.png")
-BlueBomber = pygame.image.load("Blue Bomber.png")
-HJet = pygame.image.load("H Jet.png")
 gameDisplay = pygame.display.set_mode((displayWidth, displayHeight))
+background = pygame.image.load("background6.png").convert()
+myCharacter = pygame.image.load("rocket.png")
+HealthBonus = pygame.image.load("health bonus.png")
+AmmoBonus = pygame.image.load("ammo bonus.png")
+UFO = pygame.image.load("ufo.png")
+BlueBomber = pygame.image.load("blue bomber.png")
+HJet = pygame.image.load("h jet.png")
 pygame.display.set_caption('Spacing Out')
 
 menuType = "New Game"
