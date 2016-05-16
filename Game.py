@@ -6,7 +6,7 @@ import math
 import sqlite3
 from operator import itemgetter
 
-class gameEventHandler(object):
+class GameEventHandler(object):
     def textObjects(self, text, font, color):
         self.text = text
         self.font = font
@@ -508,7 +508,7 @@ class gameEventHandler(object):
             if self.event.type == pygame.QUIT:
                 self.exiting = True
             if self.event.type == pygame.KEYDOWN and self.event.key == pygame.K_ESCAPE and self.fromWhere == "Game":
-                self.myMenu = menuScreen("Pause", screenSizeSelection, difficultySelection, displayType)
+                self.myMenu = MenuScreen("Pause", screenSizeSelection, difficultySelection, displayType)
                 self.difficultySelection, self.screenSizeSelection, self.displayType, self.exiting = self.myMenu.displayMenuScreenAndHandleUserInput()
                 del self.myMenu
                 #TO DO: TEST IF RESOLUTION WAS REDUCED BECAUSE PLAYER COULD NOW BE OUTSIDE OF SCREEN BOUNDS
@@ -531,7 +531,7 @@ class gameEventHandler(object):
             self.rocketYDelta = self.rocketAccel
         return self.exiting, self.ammo, self.myProjectiles, self.rocketXDelta, self.rocketYDelta, self.enterPressed, self.screenSizeSelection, self.displayType
 
-class highScoresDatabase(object):
+class HighScoresDatabase(object):
     def __init__(self):
         self.numberOfRecordsPerDifficulty = 10
         
@@ -642,7 +642,7 @@ class highScoresDatabase(object):
             self.initializeDatabase()
         self.connection.close()
 
-class menuScreen(object):
+class MenuScreen(object):
     def __init__(self, menuType, screenSizeSelection, difficultySelection, displayType):
         self.menuType = menuType
         self.screenSizeSelection = screenSizeSelection
@@ -686,9 +686,9 @@ class menuScreen(object):
         self.colorIntensity = 255
         self.colorIntensityDirection = 5
         self.startPlay = False
-        self.menuGameEventHandler = gameEventHandler()
+        self.menuGameEventHandler = GameEventHandler()
         self.screenMoveCounter = 0
-        self.myHighScoreDatabase = highScoresDatabase()
+        self.myHighScoreDatabase = HighScoresDatabase()
         self.myHighScores = self.myHighScoreDatabase.loadHighScores()
         self.highScoreDifficulty = 0
 
@@ -972,7 +972,7 @@ class menuScreen(object):
             self.menuDirectory = "Main"
             self.menuSelectionIndex = 4
         
-class gameScreen(object):
+class GameScreen(object):
     def __init__(self, difficultySelection, screenSizeSelection, displayType):
         self.difficultySelection = difficultySelection  
         self.screenSizeSelection = screenSizeSelection
@@ -1004,7 +1004,7 @@ class gameScreen(object):
         self.score = 0
         self.x = (self.allResolutionsAvail[self.screenSizeSelection][0]/2.0)-(self.rocketWidth/2.0)
         self.y = (self.allResolutionsAvail[self.screenSizeSelection][1]-self.rocketHeight)
-        self.myGameEventHandler = gameEventHandler()
+        self.myGameEventHandler = GameEventHandler()
         
     def gameLoop(self):
         while self.exiting == False and self.lost == False:
@@ -1060,11 +1060,11 @@ displayType = "Window"
 exiting = False
 
 while exiting == False:
-    myMenu = menuScreen(menuType, screenSizeSelection, difficultySelection, displayType)
+    myMenu = MenuScreen(menuType, screenSizeSelection, difficultySelection, displayType)
     difficultySelection, screenSizeSelection, displayType, exiting = myMenu.displayMenuScreenAndHandleUserInput()
     del myMenu
     if exiting == False:
-        myGame = gameScreen(difficultySelection, screenSizeSelection, displayType)
+        myGame = GameScreen(difficultySelection, screenSizeSelection, displayType)
         difficultySelection, screenSizeSelection, displayType, exiting = myGame.gameLoop()
         del myGame
 pygame.quit()
