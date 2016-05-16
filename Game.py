@@ -39,7 +39,7 @@ class GameEventHandler(object):
         gameDisplay.blit(self.textSurf, self.textRect)
 
     def handleIfUserGotHighScore(self, difficultySelection, score, displayWidth, displayHeight):
-        self.myHighScoreDatabase = highScoresDatabase()
+        self.myHighScoreDatabase = HighScoresDatabase()
         self.myHighScores = self.myHighScoreDatabase.loadHighScores()
         self.difficultySelection = difficultySelection
         self.score = score
