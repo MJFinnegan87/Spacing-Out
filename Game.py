@@ -981,6 +981,7 @@ class GameScreen(object):
         self.allResolutionsAvail.sort()
         self.displayWidth = self.allResolutionsAvail[self.screenSizeSelection][0]
         self.displayHeight = self.allResolutionsAvail[self.screenSizeSelection][1]
+        self.background = pygame.image.load("background" + str(random.randint(1, 7)) + ".png").convert()
         self.exiting = False
         self.lost = False
         self.rocketWidth = 48
@@ -1019,7 +1020,7 @@ class GameScreen(object):
                 "Game", self.ammo, self.currentGun, self.myProjectiles, self.rocketAccel, self.x, self.y, self.rocketWidth, self.difficultySelection, self.screenSizeSelection, self.displayType, self.allResolutionsAvail[self.screenSizeSelection][1]) 
             self.x, self.y = self.myGameEventHandler.movePlayer(self.x, self.y, self.rocketWidth, self.rocketHeight, self.rocketXDelta, self.rocketYDelta, self.allResolutionsAvail[self.screenSizeSelection][0], self.allResolutionsAvail[self.screenSizeSelection][1])
             #gameDisplay.fill(black)
-            gameDisplay.blit(background, (0, 0))
+            gameDisplay.blit(self.background, (0, 0))
             self.myProjectiles, self.myEnemies, self.myHealth, self.score, self.enemiesAlive, self.y, self.ammo = self.myGameEventHandler.moveAndDrawProjectilesAndEnemies(
                 self.myProjectiles, self.myEnemies, self.myHealth, self.score, self.enemiesAlive, self.x, self.y, self.rocketWidth, self.rocketHeight, self.difficultySelection, self.allResolutionsAvail[self.screenSizeSelection][0], self.allResolutionsAvail[self.screenSizeSelection][1], self.ammo, self.starMoveSpeed)
             self.lost = self.myGameEventHandler.testIfPlayerLost(self.myHealth, self.exiting, self.score, self.allResolutionsAvail[self.screenSizeSelection][0], self.allResolutionsAvail[self.screenSizeSelection][1])
@@ -1044,7 +1045,6 @@ allResolutionsAvail.sort()
 displayWidth = allResolutionsAvail[(int(len(allResolutionsAvail)/2.0))][0]
 displayHeight = allResolutionsAvail[(int(len(allResolutionsAvail)/2.0))][1]
 gameDisplay = pygame.display.set_mode((displayWidth, displayHeight))
-background = pygame.image.load("background6.png").convert()
 myCharacter = pygame.image.load("rocket.png")
 HealthBonus = pygame.image.load("health bonus.png")
 AmmoBonus = pygame.image.load("ammo bonus.png")
