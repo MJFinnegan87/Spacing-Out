@@ -6,6 +6,7 @@ import math
 import sqlite3
 from operator import itemgetter
 
+#Python 3.6
 class GameEventHandler(object):
     def textObjects(self, text, font, color):
         self.text = text
@@ -47,7 +48,7 @@ class GameEventHandler(object):
         self.displayHeight = displayHeight
 
         self.alreadyRecievedHighScoreInfo = False
-        for self.handleHighScoreCounter in xrange(self.myHighScoreDatabase.numberOfRecordsPerDifficulty):
+        for self.handleHighScoreCounter in range(self.myHighScoreDatabase.numberOfRecordsPerDifficulty):
             if self.score > int(self.myHighScores[self.difficultySelection][self.handleHighScoreCounter][2]) and self.alreadyRecievedHighScoreInfo == False:
                 self.highScoreName, self.highScoreState, self.highScoreCountry = self.newHighScore(self.displayWidth, self.displayHeight)
                 self.alreadyRecievedHighScoreInfo = True
@@ -55,7 +56,7 @@ class GameEventHandler(object):
             self.myHighScores[self.difficultySelection].append([0, self.highScoreName, self.score, self.highScoreState, self.highScoreCountry])
             self.myHighScores[self.difficultySelection] = sorted(self.myHighScores[self.difficultySelection], key = itemgetter(2), reverse = True)
             self.myHighScores[self.difficultySelection].pop()
-            for self.handleHighScoreCounter in xrange(self.myHighScoreDatabase.numberOfRecordsPerDifficulty):
+            for self.handleHighScoreCounter in range(self.myHighScoreDatabase.numberOfRecordsPerDifficulty):
                 self.myHighScores[self.difficultySelection][self.handleHighScoreCounter][0] = self.handleHighScoreCounter + 1
             self.myHighScoreDatabase.updateHighScoresForThisDifficulty(self.myHighScores[self.difficultySelection], self.difficultySelection)
         del self.myHighScoreDatabase
@@ -243,7 +244,7 @@ class GameEventHandler(object):
             self.returnString = "My Bullet - "
         return [self.returnString + self.gunType, self.bulletWidth, self.bulletLength, self.r, self.g, self.b, self.speed, self.damage, self.dx]
 
-    def enemy(self, species):
+    def createEnemy(self, species):
         self.species = species
         self.speed = 0
         self.weapon = "Teleport"
@@ -294,7 +295,7 @@ class GameEventHandler(object):
         self.displayWidth = displayWidth
         self.displayHeight = displayHeight
         if self.enemyInfo[0] == "Enemy Bullet - Teleport": #Here, we're moving the teleport bullet like an enemy, since it needs to move with the UFO
-            if (self.enemyInfo[1] - ((self.enemy(0)[10] - self.enemyInfo[3])/2.0)) + self.enemy(0)[10] + self.enemyInfo[10] > self.displayWidth or self.enemyInfo[1] - ((self.enemy(0)[10] - self.enemyInfo[3])/2.0) + self.enemyInfo[10] <0:
+            if (self.enemyInfo[1] - ((self.createEnemy(0)[10] - self.enemyInfo[3])/2.0)) + self.createEnemy(0)[10] + self.enemyInfo[10] > self.displayWidth or self.enemyInfo[1] - ((self.createEnemy(0)[10] - self.enemyInfo[3])/2.0) + self.enemyInfo[10] <0:
                 self.enemyInfo[10] = -self.enemyInfo[10]
             return self.enemyInfo[10]
         else: #Otherwise, if we're not dealing with the teleport bullet, we're dealing with an actual enemy object:
@@ -354,12 +355,12 @@ class GameEventHandler(object):
             self.currentLevel = self.currentLevel + 1
             if self.currentLevel >= 8:
                 self.currentGun = "Plasma Gun"
-            for i in xrange(self.currentLevel):
+            for i in range(self.currentLevel):
                 self.enemiesAlive = self.enemiesAlive + 1
-                self.myEnemies.append(self.enemy(random.randint(0, min(self.currentLevel-1,2))))
+                self.myEnemies.append(self.createEnemy(random.randint(0, min(self.currentLevel-1,2))))
 
         #ADD STARS
-        if random.randint(1, self.starProbabilitySpace) in xrange(1, int(self.starDensity * self.starProbabilitySpace)+1):
+        if random.randint(1, self.starProbabilitySpace) in range(1, int(self.starDensity * self.starProbabilitySpace)+1):
             self.rndNumb = random.randint(1, self.displayWidth)
                                         #label, x, y, width, height, r, g, b, speed, damage, dx, ammo
             self.myProjectiles.append(["Star", self.rndNumb, 0, 1 , 1 , 255, 255, 255, self.starMoveSpeed, 0, 0, 0])
@@ -400,7 +401,7 @@ class GameEventHandler(object):
         self.ammo = ammo
         self.starMoveSpeed = starMoveSpeed
         self.myDeleteList = []
-        for self.i in xrange(len(self.myProjectiles)): #for each bullet, star, and game bonus
+        for self.i in range(len(self.myProjectiles)): #for each bullet, star, and game bonus
             if (self.myProjectiles[self.i][0] == "Star" or str(self.myProjectiles[self.i][0])[:4] == "Enem" or "Bonus" in self.myProjectiles[self.i][0]): #if this projectile is a star or enemy bullet,
                 if self.myProjectiles[self.i][2] + self.myProjectiles[self.i][8] + 1 >= self.displayHeight or self.myProjectiles[self.i][2] + self.myProjectiles[self.i][4] + self.myProjectiles[self.i][8] -1 <= 0: #if it's going beyond the top/bottom of the screen
                     self.myDeleteList.append(self.i) #flag it for deletion by putting it in a list which we later use to delete it from myProjectiles. Deleting now wreaks havoc on our for loop
@@ -423,7 +424,7 @@ class GameEventHandler(object):
                 if self.myProjectiles[self.i][2] + self.myProjectiles[self.i][8] - 1 < 0: #if it's going above the top of the screen,
                     self.myDeleteList.append(self.i) #flag this projectile for deletion
                 else:
-                    for self.j in xrange(len(self.myEnemies)): #with this bullet, for each enemy:
+                    for self.j in range(len(self.myEnemies)): #with this bullet, for each enemy:
                         #if this bullet hit this enemy,                                                                                                                                                                                                                                             bulletx              +   bullet width        enemyx                 bulletx               enemyx            + enemywidth            bullety           +  bulletheight                                     enemyy                  bullety                                        enemyy             +enemyheight
                         if ((self.myProjectiles[self.i][1] + self.myProjectiles[self.i][3] >= self.myEnemies[self.j][6]) and (self.myProjectiles[self.i][1] <= self.myEnemies[self.j][6] + self.myEnemies[self.j][10]) and (self.myProjectiles[self.i][2] + self.myProjectiles[self.i][4] >= self.myEnemies[self.j][7]) and (self.myProjectiles[self.i][2] <= self.myEnemies[self.j][7] + self.myEnemies[self.j][11])) or ((self.myProjectiles[self.i][1] + self.myProjectiles[self.i][3] >= self.myEnemies[self.j][6]) and (self.myProjectiles[self.i][1] <= self.myEnemies[self.j][6] + self.myEnemies[self.j][10]) and (self.myProjectiles[self.i][2] + self.myProjectiles[self.i][4] + (self.myProjectiles[self.i][8]/2.0) >= self.myEnemies[self.j][7]) and (self.myProjectiles[self.i][2] + (self.myProjectiles[self.i][8]/2.0) <= self.myEnemies[self.j][7] + self.myEnemies[self.j][11])):
                             self.myEnemies[self.j][2] = self.myEnemies[self.j][2] - self.myProjectiles[self.i][9] #reduce enemy health
@@ -436,7 +437,7 @@ class GameEventHandler(object):
                                     #SURFACE, (R,G,B), ((X1Y1), (X2Y1), (X2Y2), (X1Y2))
                 pygame.draw.polygon(gameDisplay, (self.myProjectiles[self.i][5], self.myProjectiles[self.i][6], self.myProjectiles[self.i][7]), ((self.myProjectiles[self.i][1], self.myProjectiles[self.i][2] + self.myProjectiles[self.i][4]), (self.myProjectiles[self.i][1] + (self.myProjectiles[self.i][3]), self.myProjectiles[self.i][2] + self.myProjectiles[self.i][4]),  (self.myProjectiles[self.i][1] + (self.myProjectiles[self.i][3]/2.0), self.myProjectiles[self.i][2]), (self.myProjectiles[self.i][1] + (self.myProjectiles[self.i][3]/2.0), self.myProjectiles[self.i][2])), 0)
             elif (str(self.myProjectiles[self.i][0]) == "Enemy Bullet - Teleport"):
-                pygame.draw.polygon(gameDisplay, (self.myProjectiles[self.i][5], self.myProjectiles[self.i][6], self.myProjectiles[self.i][7]), ((self.myProjectiles[self.i][1], max(self.myProjectiles[self.i][2] + self.myProjectiles[self.i][4], self.enemy(0)[11])), (self.myProjectiles[self.i][1] + (self.myProjectiles[self.i][3]), max(self.myProjectiles[self.i][2] + self.myProjectiles[self.i][4], self.enemy(0)[11])),  (self.myProjectiles[self.i][1] + (self.myProjectiles[self.i][3]/2.0), max(self.myProjectiles[self.i][2], self.enemy(0)[11])), (self.myProjectiles[self.i][1] + (self.myProjectiles[self.i][3]/2.0), max(self.myProjectiles[self.i][2], self.enemy(0)[11]))), 0)
+                pygame.draw.polygon(gameDisplay, (self.myProjectiles[self.i][5], self.myProjectiles[self.i][6], self.myProjectiles[self.i][7]), ((self.myProjectiles[self.i][1], max(self.myProjectiles[self.i][2] + self.myProjectiles[self.i][4], self.createEnemy(0)[11])), (self.myProjectiles[self.i][1] + (self.myProjectiles[self.i][3]), max(self.myProjectiles[self.i][2] + self.myProjectiles[self.i][4], self.createEnemy(0)[11])),  (self.myProjectiles[self.i][1] + (self.myProjectiles[self.i][3]/2.0), max(self.myProjectiles[self.i][2], self.createEnemy(0)[11])), (self.myProjectiles[self.i][1] + (self.myProjectiles[self.i][3]/2.0), max(self.myProjectiles[self.i][2], self.createEnemy(0)[11]))), 0)
             elif (str(self.myProjectiles[self.i][0]) == "Health Bonus"): #but if it's a game bonus, then display
                 self.drawObject(HealthBonus, self.myProjectiles[self.i][1], self.myProjectiles[self.i][2])
             elif (str(self.myProjectiles[self.i][0]) == "Ammo Bonus"): #but if it's a game bonus, then display
@@ -446,11 +447,11 @@ class GameEventHandler(object):
             
 
         #delete those projectiles we flagged for deletion
-        for self.i in xrange(len(self.myDeleteList)):
+        for self.i in range(len(self.myDeleteList)):
             del self.myProjectiles[self.myDeleteList[self.i]-self.i]
         
         self.myDeleteList = []
-        for self.i in xrange(len(self.myEnemies)): #for each enemy
+        for self.i in range(len(self.myEnemies)): #for each enemy
             if self.myEnemies[self.i][2] <= 0: #if this enemy's health is <= 0, then
                 self.enemiesAlive = self.enemiesAlive - 1
                 self.score = self.score + 1
@@ -464,7 +465,7 @@ class GameEventHandler(object):
                 self.drawFromFile(self.myEnemies[self.i][5], self.myEnemies[self.i][6], self.myEnemies[self.i][7])
                 self.myEnemies[self.i] = self.enemyMovementAI(self.myEnemies[self.i], self.displayWidth, self.displayHeight) #establish this enemy's next move
         #delete enemies that were flagged for completion
-        for self.i in xrange(len(self.myDeleteList)):
+        for self.i in range(len(self.myDeleteList)):
             del self.myEnemies[self.myDeleteList[self.i]-self.i]
         return self.myProjectiles, self.myEnemies, self.myHealth, self.score, self.enemiesAlive, self.y, self.ammo
 
@@ -540,7 +541,7 @@ class HighScoresDatabase(object):
         self.iNeedThisManyMoreBlankSlots = self.numberOfRecordsPerDifficulty - len(self.workingArray)
         self.n = 0
         self.b = [[],]
-        for self.row in xrange(self.iNeedThisManyMoreBlankSlots):
+        for self.row in range(self.iNeedThisManyMoreBlankSlots):
             self.n = self.n + 1
             self.b.append([self.n, "-", 0, "-", "-"])
         self.b.remove([])
@@ -554,7 +555,7 @@ class HighScoresDatabase(object):
             self.connection = sqlite3.connect("High_Scores.db")
             self.c = self.connection.cursor()
             self.row = ([])
-            for self.loadCounter in xrange(5):
+            for self.loadCounter in range(5):
                 self.a = [[],]
                 if self.loadCounter == 0:
                     self.c.execute("""SELECT * FROM easyHighScoreTable ORDER BY scoreRecordPK""")
@@ -593,12 +594,12 @@ class HighScoresDatabase(object):
         self.c.execute("CREATE TABLE expertHighScoreTable(scoreRecordPK INT, Name TEXT, Score INT, State TEXT, Country TEXT)")
         self.c.execute("DROP TABLE IF EXISTS lolHighScoreTable")
         self.c.execute("CREATE TABLE lolHighScoreTable(scoreRecordPK INT, Name TEXT, Score INT, State TEXT, Country TEXT)")
-        for self.loadCounter in xrange(5):
+        for self.loadCounter in range(5):
             #self.highScoresArray.append([])
             self.highScoresArray.insert(self.loadCounter, self.fillInBlankHighScores(self.highScoresArray[self.loadCounter]))
             #self.highScoresArray = self.fillInBlankHighScores(self.highScoresArray[self.loadCounter])
         self.highScoresArray.remove([])
-        for self.loadCounter in xrange(5):
+        for self.loadCounter in range(5):
             self.updateHighScoresForThisDifficulty(self.highScoresArray[self.loadCounter], self.loadCounter)
         self.connection.close()
         return self.highScoresArray
@@ -752,7 +753,7 @@ class MenuScreen(object):
         self.exiting, self.ammo, self.myProjectiles, self.rocketXDelta, self.rocketYDelta, self.enterPressed, self.screenSizeSelection, self.displayType =  self.menuGameEventHandler.handleKeyPresses("Main Menu", self.ammo, self.currentGun, self.myProjectiles, self.rocketAccel, self.x, self.y, self.rocketWidth, self.difficultySelection, self.screenSizeSelection, self.displayType, self.displayHeight)
 
     def displayMainMenu(self):
-        for self.i in xrange(7):
+        for self.i in range(7):
             self.rgb = (255, 255, 255)
             if self.i == self.menuSelectionIndex:
                 self.rgb = (self.colorIntensity, 0, 0)
@@ -784,7 +785,7 @@ class MenuScreen(object):
         self.fullScreenWindowChanged = False
         self.screenSizeChoices = pygame.display.list_modes()
         self.screenSizeChoices.sort()
-        for self.i in xrange(5):
+        for self.i in range(5):
             self.rgb = (255, 255, 255)
             if self.i == 4:
                 self.text = "Screen Size: " + str(self.screenSizeChoices[self.screenSizeSelection][0]) + "x" + str(self.screenSizeChoices[self.screenSizeSelection][1])
@@ -808,7 +809,7 @@ class MenuScreen(object):
             self.displayTitle()
             self.displayMainMenu()
     
-        for self.i in xrange(3):
+        for self.i in range(3):
             self.rgb = (255, 255, 255)
             if self.i == 2:
                 self.text = "Programming by Mike Finnegan"
@@ -826,7 +827,7 @@ class MenuScreen(object):
             self.screenMoveCounter = self.screenMoveCounter + self.maximumStarMoveSpeed
             self.displayTitle()
             self.displayMainMenu()
-        for self.i in xrange(3):
+        for self.i in range(3):
             self.rgb = (255, 255, 255)
             if self.i == 2:
                 self.text = "Escape key: pause game"
@@ -856,8 +857,8 @@ class MenuScreen(object):
             self.textSurf, self.textRect = self.menuGameEventHandler.textObjects("<<  You already lost lol High Scores  >>", self.smallText, self.rgb)
         self.textRect.center = ((self.displayWidth/2.0), (self.screenMoveCounter + 90))
         gameDisplay.blit(self.textSurf, self.textRect)
-        for self.i in xrange(-1, 11):
-            for self.j in xrange(5):
+        for self.i in range(-1, 11):
+            for self.j in range(5):
                 if self.i == -1:
                     self.rgb = (255, 255, 255)
                     if self.j == 0:
