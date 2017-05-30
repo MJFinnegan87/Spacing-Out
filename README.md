@@ -5,4 +5,4 @@ This program was a fun way for me to learn about handling user keypresses, using
 
 The end result is a fun, responsive game that is mildly addictive. Although I wrote all the code myself, I cannot release the game as my own software because the idea for the game came from Namco's 1979 hit game "Galaxian." See: https://en.wikipedia.org/wiki/Galaxian for further information. No copyright infringement occurred in the making of this game, it was purely for academic purposes.
 
-![Screenshot](/Screenshot 1.png?raw=false "Screenshot")
+![Screenshot](Screenshot 1.png?raw=false "Screenshot")
